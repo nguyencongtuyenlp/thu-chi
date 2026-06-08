@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-<meta name="theme-color" content="#0f172a" />
+<meta name="theme-color" content="#0a0e1a" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Thu Chi" />
@@ -11,206 +11,236 @@
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icon.svg" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <title>Quản Lý Thu Chi Cá Nhân</title>
 <style>
-  /* ===== THEME ===== */
+  /* ===== THEME (Stripe-inspired) ===== */
   :root, [data-theme="dark"] {
-    --bg: #0f172a; --bg-soft: #1e293b; --card: #1e293b; --card-2: #273449;
-    --border: #334155; --text: #e2e8f0; --muted: #94a3b8;
-    --primary: #6366f1; --primary-d: #4f46e5;
-    --income: #22c55e; --expense: #ef4444;
-    --good-bg: rgba(34,197,94,.12); --warn-bg: rgba(245,158,11,.14); --bad-bg: rgba(239,68,68,.14); --info-bg: rgba(99,102,241,.14);
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
-    --nav-bg: rgba(17,24,39,.82); color-scheme: dark;
+    --bg: #0a0e1a; --bg-soft: #11182b; --card: #121a2e; --card-2: #1a2440;
+    --border: #25304a; --text: #e7ebf4; --muted: #8893ab; --muted-2: #5f6b85;
+    --primary: #6d63ff; --primary-d: #5b51e8; --primary-press: #4a40c4;
+    --income: #34d399; --expense: #fb6f84;
+    --good-bg: rgba(52,211,153,.12); --warn-bg: rgba(245,179,66,.14); --bad-bg: rgba(251,111,132,.13); --info-bg: rgba(109,99,255,.14);
+    --good-fg: #34d399; --warn-fg: #f5b342; --bad-fg: #fb6f84; --info-fg: #8b83ff;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.30);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
+    --nav-bg: rgba(11,15,26,.82); color-scheme: dark;
   }
   [data-theme="light"] {
-    --bg: #f1f5f9; --bg-soft: #f8fafc; --card: #ffffff; --card-2: #f1f5f9;
-    --border: #e2e8f0; --text: #1e293b; --muted: #64748b;
-    --primary: #6366f1; --primary-d: #4f46e5;
-    --income: #16a34a; --expense: #dc2626;
-    --good-bg: rgba(22,163,74,.10); --warn-bg: rgba(245,158,11,.14); --bad-bg: rgba(220,38,38,.10); --info-bg: rgba(99,102,241,.10);
-    --shadow: 0 10px 30px rgba(15,23,42,.08);
+    --bg: #f6f9fc; --bg-soft: #eef3f9; --card: #ffffff; --card-2: #f4f7fb;
+    --border: #e3e8ee; --text: #0d253d; --muted: #5b6b82; --muted-2: #8a99ad;
+    --primary: #533afd; --primary-d: #4434d4; --primary-press: #2e2b8c;
+    --income: #0e9f6e; --expense: #e5484d;
+    --good-bg: rgba(14,159,110,.10); --warn-bg: rgba(217,150,18,.12); --bad-bg: rgba(229,72,77,.09); --info-bg: rgba(83,58,253,.08);
+    --good-fg: #0e9f6e; --warn-fg: #b27c10; --bad-fg: #e5484d; --info-fg: #533afd;
+    --shadow: 0 1px 2px rgba(0,55,112,.08), 0 10px 28px rgba(0,55,112,.07);
+    --shadow-sm: 0 1px 2px rgba(0,55,112,.07);
     --nav-bg: rgba(255,255,255,.85); color-scheme: light;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(1200px 600px at 80% -10%, var(--bg-soft) 0%, var(--bg) 55%);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    background-image: radial-gradient(900px 500px at 88% -8%, color-mix(in srgb, var(--primary) 14%, transparent) 0%, transparent 60%);
     background-attachment: fixed;
-    color: var(--text); min-height: 100vh; line-height: 1.5;
+    color: var(--text); min-height: 100vh; line-height: 1.5; font-size: 15px;
     padding: max(18px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 60px max(14px, env(safe-area-inset-left));
     -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;
+    font-feature-settings: "ss01"; font-variant-numeric: tabular-nums;
     transition: background .25s, color .25s;
   }
   .wrap { max-width: 1040px; margin: 0 auto; }
+  svg { display: block; }
 
   /* ===== HEADER ===== */
-  header.app-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  header.app-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
   .brand { display: flex; align-items: center; gap: 12px; }
-  .brand .logo { width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(135deg, var(--primary), #a855f7); display: grid; place-items: center; font-size: 23px; box-shadow: var(--shadow); }
-  .brand h1 { font-size: 19px; font-weight: 700; letter-spacing: .3px; }
+  .brand .logo { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; display: grid; place-items: center; box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 40%, transparent); }
+  .brand .logo svg { width: 23px; height: 23px; }
+  .brand h1 { font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
   .brand p { font-size: 12.5px; color: var(--muted); }
   .head-right { display: flex; align-items: center; gap: 8px; }
-  .icon-btn { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-size: 18px; transition: .15s; }
-  .icon-btn:hover { background: var(--card-2); border-color: var(--primary); }
-  .account { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 5px 6px 5px 11px; }
-  .account .email { font-size: 12px; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sync { width: 9px; height: 9px; border-radius: 50%; background: #64748b; flex-shrink: 0; }
-  .sync.ok { background: var(--income); }
-  .sync.saving { background: #f59e0b; animation: pulse 1s infinite; }
-  .sync.error { background: var(--expense); }
-  @keyframes pulse { 50% { opacity: .35; } }
-  .icon-btn.sm { width: 32px; height: 32px; font-size: 15px; border-radius: 9px; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; display: grid; place-items: center; transition: .15s; }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .icon-btn:hover { background: var(--card-2); border-color: var(--primary); color: var(--primary); }
+  .account { display: flex; align-items: center; gap: 9px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 5px 6px 5px 12px; }
+  .account .email { font-size: 12.5px; color: var(--muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .sync { width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); flex-shrink: 0; box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted-2) 22%, transparent); }
+  .sync.ok { background: var(--income); box-shadow: 0 0 0 3px color-mix(in srgb, var(--income) 22%, transparent); }
+  .sync.saving { background: var(--warn-fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn-fg) 22%, transparent); animation: pulse 1s infinite; }
+  .sync.error { background: var(--expense); box-shadow: 0 0 0 3px color-mix(in srgb, var(--expense) 22%, transparent); }
+  @keyframes pulse { 50% { opacity: .4; } }
+  .icon-btn.sm { width: 32px; height: 32px; border-radius: 9px; }
+  .icon-btn.sm svg { width: 15px; height: 15px; }
 
   /* ===== TABS ===== */
-  .tabs { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 6px; margin-bottom: 20px; box-shadow: var(--shadow); overflow-x: auto; }
-  .tabs button { flex: 1; white-space: nowrap; border: none; background: transparent; color: var(--muted); padding: 11px 14px; border-radius: 9px; cursor: pointer; font-weight: 600; font-size: 14px; transition: .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .tabs button .ic { font-size: 15px; }
+  .tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 5px; margin-bottom: 22px; box-shadow: var(--shadow-sm); overflow-x: auto; }
+  .tabs button { flex: 1; white-space: nowrap; border: none; background: transparent; color: var(--muted); padding: 10px 14px; border-radius: 9px; cursor: pointer; font-weight: 600; font-size: 13.5px; letter-spacing: -.1px; transition: .15s; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: inherit; }
+  .tabs button .ic { display: inline-flex; }
+  .tabs button .ic svg { width: 17px; height: 17px; }
   .tabs button:hover { color: var(--text); }
-  .tabs button.active { background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; box-shadow: 0 5px 14px rgba(79,70,229,.4); }
+  .tabs button.active { background: var(--info-bg); color: var(--primary); }
 
   .view { display: none; }
   .view.active { display: block; animation: fade .25s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   /* ===== CARDS ===== */
-  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
-  .card .label { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
-  .card .value { font-size: 24px; font-weight: 800; margin-top: 7px; letter-spacing: .3px; }
-  .card.balance .value { color: #818cf8; }
+  .cards { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow-sm); }
+  .card .label { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .card .label .li { display: inline-flex; color: var(--muted-2); }
+  .card .label .li svg { width: 15px; height: 15px; }
+  .card .value { font-size: 25px; font-weight: 600; margin-top: 9px; letter-spacing: -.6px; }
+  .card.balance { background: linear-gradient(140deg, var(--primary), var(--primary-d)); border-color: transparent; color: #fff; box-shadow: 0 10px 28px color-mix(in srgb, var(--primary) 32%, transparent); }
+  .card.balance .label, .card.balance .label .li { color: rgba(255,255,255,.82); }
+  .card.balance .value { color: #fff; }
   .card.income .value { color: var(--income); }
   .card.expense .value { color: var(--expense); }
-  .card .glow { position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; border-radius: 50%; opacity: .12; }
-  .card.balance .glow { background: var(--primary); }
-  .card.income .glow { background: var(--income); }
-  .card.expense .glow { background: var(--expense); }
 
-  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 18px; }
-  .panel h2 { font-size: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .panel h2 .sub { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  .grid-form { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+  .panel h2 { font-size: 15px; font-weight: 600; letter-spacing: -.2px; margin-bottom: 16px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .panel h2 .hicon { display: inline-flex; color: var(--primary); }
+  .panel h2 .hicon svg { width: 17px; height: 17px; }
+  .panel h2 .sub { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: auto; letter-spacing: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .grid-form { display: grid; grid-template-columns: 370px 1fr; gap: 16px; align-items: start; }
 
   /* ===== SUGGESTIONS ===== */
-  .tips { display: flex; flex-direction: column; gap: 10px; }
-  .tip { display: flex; gap: 11px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; }
-  .tip .ti { font-size: 18px; line-height: 1.3; flex-shrink: 0; }
-  .tip.good { background: var(--good-bg); } .tip.warn { background: var(--warn-bg); }
-  .tip.bad  { background: var(--bad-bg); }  .tip.info { background: var(--info-bg); }
+  .tips { display: flex; flex-direction: column; gap: 9px; }
+  .tip { display: flex; gap: 12px; align-items: flex-start; padding: 13px 15px; border-radius: 12px; font-size: 13.5px; }
+  .tip .ti { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; }
+  .tip .ti svg { width: 17px; height: 17px; }
+  .tip b { font-weight: 600; }
+  .tip.good { background: var(--good-bg); } .tip.good .ti { color: var(--good-fg); background: color-mix(in srgb, var(--good-fg) 16%, transparent); }
+  .tip.warn { background: var(--warn-bg); } .tip.warn .ti { color: var(--warn-fg); background: color-mix(in srgb, var(--warn-fg) 16%, transparent); }
+  .tip.bad  { background: var(--bad-bg); }  .tip.bad  .ti { color: var(--bad-fg);  background: color-mix(in srgb, var(--bad-fg) 16%, transparent); }
+  .tip.info { background: var(--info-bg); } .tip.info .ti { color: var(--info-fg); background: color-mix(in srgb, var(--info-fg) 16%, transparent); }
+  .tip > div:last-child { padding-top: 5px; }
 
   /* ===== FORM ===== */
   .seg { display: flex; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 11px; padding: 4px; margin-bottom: 16px; }
-  .seg button { flex: 1; border: none; background: transparent; color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; transition: .15s; }
+  .seg button { flex: 1; border: none; background: transparent; color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: .15s; font-family: inherit; }
   .seg button.active.exp { background: var(--expense); color: #fff; }
   .seg button.active.inc { background: var(--income); color: #fff; }
   .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 7px; font-weight: 600; letter-spacing: -.1px; }
   .field input, .field select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-size: 15px; outline: none; transition: .15s; font-family: inherit; }
-  .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+  .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
   .amount-input { position: relative; }
-  .amount-input span.cur { position: absolute; right: 12px; top: 38px; color: var(--muted); font-size: 13px; font-weight: 700; pointer-events: none; }
-  .btn-add { width: 100%; padding: 14px; border: none; border-radius: 11px; background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 4px; transition: .15s; box-shadow: 0 6px 18px rgba(79,70,229,.4); }
-  .btn-add:hover { transform: translateY(-1px); filter: brightness(1.08); }
-  .btn { border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); padding: 11px 14px; border-radius: 10px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: .15s; }
-  .btn:hover { border-color: var(--primary); }
+  .amount-input span.cur { position: absolute; right: 13px; top: 39px; color: var(--muted); font-size: 13px; font-weight: 600; pointer-events: none; }
+  .btn-add { width: 100%; padding: 13px; border: none; border-radius: 10px; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; transition: .15s; }
+  .btn-add:hover { background: var(--primary-d); }
+  .btn-add:active { background: var(--primary-press); }
+  .btn { border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: .15s; display: inline-flex; align-items: center; gap: 7px; font-family: inherit; }
+  .btn svg { width: 15px; height: 15px; }
+  .btn:hover { border-color: var(--primary); color: var(--primary); }
   .btn.danger:hover { border-color: var(--expense); color: var(--expense); }
-  .btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; border: none; }
+  .btn.primary { background: var(--primary); color: #fff; border: none; }
+  .btn.primary:hover { background: var(--primary-d); }
 
   /* ===== FILTERS + LIST ===== */
   .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-  .filters input, .filters select { flex: 1; min-width: 120px; padding: 10px 11px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-size: 14px; font-family: inherit; }
-  .tx-list { display: flex; flex-direction: column; gap: 9px; max-height: 620px; overflow-y: auto; padding-right: 4px; }
+  .filters input, .filters select { flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-size: 14px; font-family: inherit; outline: none; }
+  .filters input:focus, .filters select:focus { border-color: var(--primary); }
+  .tx-list { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; margin: -4px; padding: 4px; }
   .tx-list::-webkit-scrollbar { width: 8px; }
   .tx-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
-  .tx { display: flex; align-items: center; gap: 12px; padding: 12px 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; transition: .15s; }
-  .tx:hover { border-color: var(--primary); }
-  .tx .ico { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; font-size: 20px; background: var(--card-2); flex-shrink: 0; }
+  .tx { display: flex; align-items: center; gap: 12px; padding: 11px 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; transition: .15s; }
+  .tx:hover { border-color: color-mix(in srgb, var(--primary) 50%, var(--border)); }
+  .ico { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0; }
+  .ico svg { width: 19px; height: 19px; }
   .tx .info { flex: 1; min-width: 0; }
-  .tx .info .cat { font-weight: 600; font-size: 14px; }
-  .tx .info .meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tag { font-size: 10px; background: var(--card-2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 6px; margin-left: 4px; }
-  .tx .amt { font-weight: 800; font-size: 15px; white-space: nowrap; }
+  .tx .info .cat { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .tx .info .meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+  .tag { font-size: 10px; color: var(--muted); background: var(--card-2); border: 1px solid var(--border); padding: 1px 6px 1px 5px; border-radius: 6px; display: inline-flex; align-items: center; gap: 3px; font-weight: 600; }
+  .tag svg { width: 10px; height: 10px; }
+  .tx .amt { font-weight: 600; font-size: 14.5px; white-space: nowrap; letter-spacing: -.3px; }
   .tx .amt.inc { color: var(--income); }
   .tx .amt.exp { color: var(--expense); }
-  .tx .del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 8px; border-radius: 8px; opacity: .6; transition: .15s; }
-  .tx .del:hover { color: var(--expense); background: var(--bad-bg); opacity: 1; }
+  .icon-del { background: none; border: none; color: var(--muted-2); cursor: pointer; padding: 7px; border-radius: 8px; display: grid; place-items: center; transition: .15s; }
+  .icon-del svg { width: 15px; height: 15px; }
+  .icon-del:hover { color: var(--expense); background: var(--bad-bg); }
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
-  .empty .big { font-size: 40px; margin-bottom: 10px; }
+  .empty .eico { display: inline-flex; color: var(--muted-2); opacity: .6; margin-bottom: 12px; }
+  .empty .eico svg { width: 34px; height: 34px; }
 
   /* ===== CHARTS ===== */
-  .chart-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: center; }
-  .legend { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 180px; }
-  .legend .row { display: flex; align-items: center; gap: 9px; font-size: 13px; }
-  .legend .dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
-  .legend .lname { flex: 1; }
-  .legend .lval { color: var(--muted); font-weight: 600; }
+  .chart-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .legend { display: flex; flex-direction: column; gap: 11px; flex: 1; min-width: 190px; }
+  .legend .row { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend .lname { flex: 1; font-weight: 500; }
+  .legend .lval { color: var(--muted); font-weight: 500; }
 
   /* ===== BUDGET ===== */
-  .bud-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .bud-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); }
   .bud-row:last-child { border-bottom: none; }
-  .bud-row .ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; background: var(--bg-soft); flex-shrink: 0; }
   .bud-row .bud-main { flex: 1; min-width: 0; }
-  .bud-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; gap: 8px; }
+  .bud-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 7px; gap: 8px; }
+  .bud-top b { font-weight: 600; }
   .bud-top .spent { color: var(--muted); white-space: nowrap; }
-  .bar { height: 8px; border-radius: 6px; background: var(--bg-soft); overflow: hidden; }
+  .bar { height: 7px; border-radius: 6px; background: var(--bg-soft); overflow: hidden; }
   .bar > div { height: 100%; border-radius: 6px; transition: width .4s; }
-  .bud-input { width: 120px; padding: 9px 10px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-size: 14px; text-align: right; font-family: inherit; }
+  .bud-input { width: 124px; padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text); font-size: 14px; text-align: right; font-family: inherit; outline: none; }
+  .bud-input:focus { border-color: var(--primary); }
 
   /* ===== TREND ===== */
   .trend-svg { width: 100%; height: auto; }
-  .trend-legend { display: flex; gap: 20px; justify-content: center; margin-top: 10px; font-size: 13px; }
-  .trend-legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .trend-legend .dot { width: 11px; height: 11px; border-radius: 3px; }
+  .trend-legend { display: flex; gap: 20px; justify-content: center; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .trend-legend span { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; }
+  .trend-legend .dot { width: 10px; height: 10px; border-radius: 3px; }
 
   /* ===== LIST ROWS (recurring/settings) ===== */
-  .list-row { display: flex; align-items: center; gap: 12px; padding: 12px 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 9px; }
-  .list-row .ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 19px; background: var(--card-2); flex-shrink: 0; }
+  .list-row { display: flex; align-items: center; gap: 12px; padding: 12px 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
   .list-row .grow { flex: 1; min-width: 0; }
   .list-row .grow .t { font-weight: 600; font-size: 14px; }
-  .list-row .grow .s { font-size: 12px; color: var(--muted); }
-  .row-amt { font-weight: 800; white-space: nowrap; }
+  .list-row .grow .s { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .row-amt { font-weight: 600; white-space: nowrap; letter-spacing: -.3px; }
   .row-amt.inc { color: var(--income); } .row-amt.exp { color: var(--expense); }
-  .mini-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 8px; border-radius: 8px; }
-  .mini-del:hover { color: var(--expense); background: var(--bad-bg); }
-  .inline-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end; }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
-  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); }
+  .inline-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .hint code { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); }
+  .badge .sdot { width: 8px; height: 8px; border-radius: 50%; }
 
   /* ===== AUTH OVERLAY ===== */
-  .auth-overlay { position: fixed; inset: 0; background: radial-gradient(1000px 500px at 50% -10%, var(--bg-soft), var(--bg)); display: grid; place-items: center; padding: 20px; z-index: 100; }
-  .auth-card { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; box-shadow: var(--shadow); text-align: center; }
-  .auth-card .logo.big { width: 60px; height: 60px; border-radius: 16px; font-size: 30px; margin: 0 auto 14px; background: linear-gradient(135deg, var(--primary), #a855f7); display: grid; place-items: center; }
-  .auth-card h2 { font-size: 20px; margin-bottom: 6px; }
-  .auth-card .muted { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .auth-overlay { position: fixed; inset: 0; background: var(--bg); background-image: radial-gradient(800px 500px at 50% -10%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 60%); display: grid; place-items: center; padding: 20px; z-index: 100; }
+  .auth-card { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 30px 26px; box-shadow: var(--shadow); text-align: center; }
+  .auth-card .logo.big { width: 58px; height: 58px; border-radius: 16px; margin: 0 auto 16px; background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; display: grid; place-items: center; box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 38%, transparent); }
+  .auth-card .logo.big svg { width: 30px; height: 30px; }
+  .auth-card h2 { font-size: 20px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 6px; }
+  .auth-card .muted { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
   .auth-card .field { text-align: left; }
-  .auth-err { color: var(--expense); font-size: 13px; min-height: 18px; margin-bottom: 8px; text-align: left; }
-  .linkbtn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; margin-top: 14px; text-decoration: underline; }
-  .linkbtn:hover { color: var(--text); }
+  .auth-err { font-size: 13px; min-height: 18px; margin-bottom: 8px; text-align: left; line-height: 1.45; }
+  .linkbtn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; margin-top: 16px; font-family: inherit; }
+  .linkbtn:hover { color: var(--text); text-decoration: underline; }
 
   /* ===== MOBILE ===== */
   @media (max-width: 860px) {
     .grid2, .grid-form { grid-template-columns: 1fr; }
   }
   @media (max-width: 600px) {
-    body { padding: calc(10px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) calc(90px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
-    header.app-head { margin-bottom: 16px; }
+    body { padding: calc(10px + env(safe-area-inset-top)) max(13px, env(safe-area-inset-right)) calc(92px + env(safe-area-inset-bottom)) max(13px, env(safe-area-inset-left)); }
+    header.app-head { margin-bottom: 18px; }
     .brand h1 { font-size: 17px; } .brand p { display: none; }
     .cards { grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 18px; }
     .card.balance { grid-column: 1 / -1; }
-    .card { padding: 15px 16px; border-radius: 18px; }
-    .card.balance .value { font-size: 28px; }
+    .card { padding: 16px 17px; border-radius: 18px; }
+    .card.balance .value { font-size: 29px; }
     .card .value { font-size: 19px; }
     .card .label { font-size: 11.5px; }
     .account .email { display: none; }
-    .panel { padding: 16px; border-radius: 18px; }
+    .panel { padding: 17px; border-radius: 18px; }
     .filters { gap: 8px; }
     .filters input#fSearch { flex: 1 1 100%; }
     .filters select, .filters input#fMonth { flex: 1 1 0; min-width: 0; }
     .field input, .field select, .filters input, .filters select { font-size: 16px; }
-    .bud-input { font-size: 16px; width: 104px; }
-    /* bottom navigation — kính mờ kiểu iOS */
+    .bud-input { font-size: 16px; width: 108px; }
+    /* bottom navigation — frosted glass */
     .tabs {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
       margin: 0; border-radius: 22px 22px 0 0; gap: 2px;
@@ -218,12 +248,12 @@
       border: none; border-top: 1px solid var(--border);
       background: var(--nav-bg);
       -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-      box-shadow: 0 -8px 28px rgba(0,0,0,.18); overflow: visible;
+      box-shadow: 0 -8px 28px rgba(0,0,0,.16); overflow: visible;
     }
-    .tabs button { flex-direction: column; gap: 3px; font-size: 10.5px; padding: 6px 2px; border-radius: 12px; color: var(--muted); transition: color .15s, transform .15s; }
-    .tabs button .ic { font-size: 20px; transition: transform .15s; }
-    .tabs button.active { background: none; color: var(--primary); box-shadow: none; }
-    .tabs button.active .ic { transform: scale(1.12); }
+    .tabs button { flex-direction: column; gap: 4px; font-size: 10.5px; padding: 5px 2px; border-radius: 12px; color: var(--muted); }
+    .tabs button .ic svg { width: 21px; height: 21px; }
+    .tabs button.active { background: none; color: var(--primary); }
+    .tabs button.active .ic { transform: translateY(-1px); }
   }
 </style>
 </head>
@@ -231,7 +261,7 @@
 <div class="wrap">
   <header class="app-head">
     <div class="brand">
-      <div class="logo">💰</div>
+      <div class="logo" data-icon="wallet"></div>
       <div>
         <h1>Quản Lý Thu Chi</h1>
         <p>Theo dõi tài chính cá nhân</p>
@@ -241,37 +271,37 @@
       <div class="account" id="account" hidden>
         <span class="sync" id="syncDot" title="Trạng thái đồng bộ"></span>
         <span class="email" id="accEmail"></span>
-        <button class="icon-btn sm" id="btnLogout" title="Đăng xuất">⎋</button>
+        <button class="icon-btn sm" id="btnLogout" data-icon="logout" title="Đăng xuất"></button>
       </div>
-      <button class="icon-btn" id="btnTheme" title="Đổi giao diện sáng/tối">🌙</button>
+      <button class="icon-btn" id="btnTheme" title="Đổi giao diện sáng/tối"></button>
     </div>
   </header>
 
   <nav class="tabs" id="tabs">
-    <button data-view="dashboard" class="active"><span class="ic">📊</span><span class="tx">Tổng quan</span></button>
-    <button data-view="tx"><span class="ic">💳</span><span class="tx">Giao dịch</span></button>
-    <button data-view="budget"><span class="ic">📅</span><span class="tx">Ngân sách</span></button>
-    <button data-view="recurring"><span class="ic">🔁</span><span class="tx">Định kỳ</span></button>
-    <button data-view="settings"><span class="ic">⚙️</span><span class="tx">Cài đặt</span></button>
+    <button data-view="dashboard" class="active"><span class="ic" data-icon="grid"></span><span class="tx">Tổng quan</span></button>
+    <button data-view="tx"><span class="ic" data-icon="card"></span><span class="tx">Giao dịch</span></button>
+    <button data-view="budget"><span class="ic" data-icon="target"></span><span class="tx">Ngân sách</span></button>
+    <button data-view="recurring"><span class="ic" data-icon="repeat"></span><span class="tx">Định kỳ</span></button>
+    <button data-view="settings"><span class="ic" data-icon="settings"></span><span class="tx">Cài đặt</span></button>
   </nav>
 
   <!-- ===== DASHBOARD ===== -->
   <section class="view active" data-view="dashboard">
     <div class="cards">
-      <div class="card balance"><div class="glow"></div><div class="label">💼 Số dư hiện tại</div><div class="value" id="sumBalance">0 ₫</div></div>
-      <div class="card income"><div class="glow"></div><div class="label">📈 Tổng thu</div><div class="value" id="sumIncome">0 ₫</div></div>
-      <div class="card expense"><div class="glow"></div><div class="label">📉 Tổng chi</div><div class="value" id="sumExpense">0 ₫</div></div>
+      <div class="card balance"><div class="label"><span class="li" data-icon="wallet"></span> Số dư hiện tại</div><div class="value" id="sumBalance">0 ₫</div></div>
+      <div class="card income"><div class="label"><span class="li" data-icon="trending-up"></span> Tổng thu</div><div class="value" id="sumIncome">0 ₫</div></div>
+      <div class="card expense"><div class="label"><span class="li" data-icon="trending-down"></span> Tổng chi</div><div class="value" id="sumExpense">0 ₫</div></div>
     </div>
-    <div class="panel"><h2>💡 Gợi ý thu chi <span class="sub" id="tipMonth"></span></h2><div class="tips" id="tipsArea"></div></div>
-    <div class="panel"><h2>📊 Xu hướng thu chi <span class="sub">6 tháng gần nhất</span></h2><div id="trendArea"></div></div>
-    <div class="panel"><h2>🍩 Chi tiêu theo danh mục <span class="sub" id="donutMonth"></span></h2><div id="chartArea"></div></div>
+    <div class="panel"><h2><span class="hicon" data-icon="lightbulb"></span> Gợi ý thu chi <span class="sub" id="tipMonth"></span></h2><div class="tips" id="tipsArea"></div></div>
+    <div class="panel"><h2><span class="hicon" data-icon="bar-chart"></span> Xu hướng thu chi <span class="sub">6 tháng gần nhất</span></h2><div id="trendArea"></div></div>
+    <div class="panel"><h2><span class="hicon" data-icon="pie-chart"></span> Chi tiêu theo danh mục <span class="sub" id="donutMonth"></span></h2><div id="chartArea"></div></div>
   </section>
 
   <!-- ===== TRANSACTIONS ===== -->
   <section class="view" data-view="tx">
     <div class="grid-form">
       <div class="panel" style="margin-bottom:0;">
-        <h2>➕ Thêm giao dịch</h2>
+        <h2><span class="hicon" data-icon="plus"></span> Thêm giao dịch</h2>
         <div class="seg" id="typeSeg">
           <button type="button" data-type="expense" class="exp active">Chi tiêu</button>
           <button type="button" data-type="income" class="inc">Thu nhập</button>
@@ -283,9 +313,9 @@
         <button class="btn-add" id="btnAdd">Lưu giao dịch</button>
       </div>
       <div class="panel" style="margin-bottom:0;">
-        <h2>📋 Lịch sử <span class="sub" id="txCount"></span></h2>
+        <h2><span class="hicon" data-icon="list"></span> Lịch sử <span class="sub" id="txCount"></span></h2>
         <div class="filters">
-          <input type="text" id="fSearch" placeholder="🔍 Tìm kiếm..." />
+          <input type="text" id="fSearch" placeholder="Tìm kiếm giao dịch..." />
           <select id="fType"><option value="all">Tất cả</option><option value="income">Thu nhập</option><option value="expense">Chi tiêu</option></select>
           <input type="month" id="fMonth" />
         </div>
@@ -297,14 +327,14 @@
   <!-- ===== BUDGET ===== -->
   <section class="view" data-view="budget">
     <div class="panel">
-      <h2>🎯 Ngân sách tổng <span class="sub" id="budMonth"></span></h2>
+      <h2><span class="hicon" data-icon="target"></span> Ngân sách tổng <span class="sub" id="budMonth"></span></h2>
       <div class="field amount-input" style="max-width:340px;"><label>Giới hạn chi tiêu mỗi tháng</label><input type="text" id="budTotal" inputmode="numeric" placeholder="VD: 10.000.000" autocomplete="off" /><span class="cur">₫</span></div>
-      <div id="budTotalBar" style="margin-top:14px;"></div>
+      <div id="budTotalBar" style="margin-top:16px;"></div>
     </div>
     <div class="panel">
-      <h2>📂 Ngân sách theo danh mục <span class="sub">Để trống nếu không giới hạn</span></h2>
+      <h2><span class="hicon" data-icon="grid"></span> Ngân sách theo danh mục <span class="sub">Để trống nếu không giới hạn</span></h2>
       <div id="budCats"></div>
-      <button class="btn primary" id="btnSaveBudget" style="margin-top:16px;">💾 Lưu ngân sách</button>
+      <button class="btn primary" id="btnSaveBudget" style="margin-top:16px;">Lưu ngân sách</button>
       <p class="hint">Thanh tiến trình tính theo chi tiêu của tháng hiện tại.</p>
     </div>
   </section>
@@ -312,7 +342,7 @@
   <!-- ===== RECURRING ===== -->
   <section class="view" data-view="recurring">
     <div class="panel">
-      <h2>➕ Thêm giao dịch định kỳ</h2>
+      <h2><span class="hicon" data-icon="plus"></span> Thêm giao dịch định kỳ</h2>
       <p class="hint" style="margin-top:0;margin-bottom:14px;">Tự động tạo mỗi tháng (VD: lương ngày 5, tiền nhà ngày 1).</p>
       <div class="seg" id="recTypeSeg">
         <button type="button" data-type="expense" class="exp active">Chi định kỳ</button>
@@ -326,33 +356,33 @@
       </div>
       <button class="btn primary" id="btnAddRec" style="margin-top:14px;">Thêm định kỳ</button>
     </div>
-    <div class="panel"><h2>🔁 Danh sách định kỳ</h2><div id="recList"></div></div>
+    <div class="panel"><h2><span class="hicon" data-icon="repeat"></span> Danh sách định kỳ</h2><div id="recList"></div></div>
   </section>
 
   <!-- ===== SETTINGS ===== -->
   <section class="view" data-view="settings">
     <div class="panel">
-      <h2>☁️ Đồng bộ đám mây</h2>
+      <h2><span class="hicon" data-icon="cloud"></span> Đồng bộ đám mây</h2>
       <div id="cloudStatus"></div>
     </div>
     <div class="panel">
-      <h2>➕ Thêm danh mục tùy chỉnh</h2>
+      <h2><span class="hicon" data-icon="plus"></span> Thêm danh mục tùy chỉnh</h2>
       <div class="inline-form">
         <div class="field" style="margin:0;"><label>Loại</label><select id="ccType"><option value="expense">Chi tiêu</option><option value="income">Thu nhập</option></select></div>
-        <div class="field" style="margin:0;"><label>Biểu tượng (emoji)</label><input type="text" id="ccIcon" placeholder="VD: 🐶" maxlength="4" autocomplete="off" /></div>
+        <div class="field" style="margin:0;"><label>Biểu tượng</label><select id="ccIcon"></select></div>
         <div class="field" style="margin:0;"><label>Tên danh mục</label><input type="text" id="ccName" placeholder="VD: Thú cưng" autocomplete="off" /></div>
       </div>
       <button class="btn primary" id="btnAddCat" style="margin-top:14px;">Thêm danh mục</button>
       <div id="ccList" style="margin-top:18px;"></div>
     </div>
     <div class="panel">
-      <h2>💾 Dữ liệu</h2>
+      <h2><span class="hicon" data-icon="cloud"></span> Dữ liệu</h2>
       <p class="hint" style="margin-top:0;margin-bottom:14px;">Nên xuất file để sao lưu định kỳ.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn" id="btnExport">⬇️ Xuất dữ liệu (.json)</button>
-        <button class="btn" id="btnImport">⬆️ Nhập dữ liệu</button>
+        <button class="btn" id="btnExport"><span data-icon="download"></span> Xuất dữ liệu</button>
+        <button class="btn" id="btnImport"><span data-icon="upload"></span> Nhập dữ liệu</button>
         <input type="file" id="fileImport" accept="application/json" hidden />
-        <button class="btn danger" id="btnClear">🗑️ Xóa tất cả dữ liệu</button>
+        <button class="btn danger" id="btnClear"><span data-icon="trash"></span> Xóa tất cả</button>
       </div>
     </div>
   </section>
@@ -361,14 +391,14 @@
 <!-- ===== AUTH OVERLAY ===== -->
 <div class="auth-overlay" id="authOverlay" hidden>
   <div class="auth-card">
-    <div class="logo big">💰</div>
+    <div class="logo big" data-icon="wallet"></div>
     <h2>Quản Lý Thu Chi</h2>
     <p class="muted">Đăng nhập để đồng bộ dữ liệu trên mọi thiết bị</p>
     <div class="field"><label>Email</label><input type="email" id="authEmail" placeholder="ban@email.com" autocomplete="username" /></div>
     <div class="field"><label>Mật khẩu</label><input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password" /></div>
     <div class="auth-err" id="authErr"></div>
     <button class="btn-add" id="btnLogin">Đăng nhập</button>
-    <button class="btn" id="btnSignup" style="width:100%;margin-top:9px;">Tạo tài khoản mới</button>
+    <button class="btn" id="btnSignup" style="width:100%;margin-top:9px;justify-content:center;">Tạo tài khoản mới</button>
     <br><button class="linkbtn" id="btnOffline">Dùng offline (không đồng bộ) →</button>
   </div>
 </div>
@@ -378,23 +408,87 @@
 <script>
 "use strict";
 
+/* ==================== ICONS (line / SVG) ==================== */
+const ICONS = {
+  wallet: '<path d="M20 7H6a2 2 0 0 1 0-4h12v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H5"/><circle cx="16.5" cy="14" r="1.4" fill="currentColor" stroke="none"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+  card: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+  repeat: '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  'trending-up': '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'trending-down': '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',
+  lightbulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .7-1.8 1.4-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.2 1.5 1.4 2.5"/>',
+  'bar-chart': '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  'pie-chart': '<path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>',
+  list: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3.5" y1="6" x2="3.51" y2="6"/><line x1="3.5" y1="12" x2="3.51" y2="12"/><line x1="3.5" y1="18" x2="3.51" y2="18"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  cloud: '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  'alert-triangle': '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  'alert-octagon': '<polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  utensils: '<path d="M3 3v7a3 3 0 0 0 6 0V3"/><line x1="6" y1="10" x2="6" y2="21"/><path d="M16 3c-1.5 0-2.5 2-2.5 5s1 5 2.5 5"/><line x1="16" y1="3" x2="16" y2="21"/>',
+  car: '<path d="M19 17h2v-5l-2.2-5.4A2 2 0 0 0 17 5.3H7a2 2 0 0 0-1.8 1.3L3 12v5h2"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/><path d="M9.5 17h5"/>',
+  bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  receipt: '<path d="M5 2v20l2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/>',
+  home: '<path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/><path d="M9.5 21v-6h5v6"/>',
+  heart: '<path d="M20.8 5.6a5 5 0 0 0-7-.2L12 7l-1.8-1.6a5 5 0 1 0-7 7.2L12 21l8.8-8.4a5 5 0 0 0 0-7z"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  gamepad: '<rect x="2" y="7" width="20" height="11" rx="3.5"/><line x1="7" y1="11" x2="7" y2="14"/><line x1="5.5" y1="12.5" x2="8.5" y2="12.5"/><circle cx="16" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="18.5" cy="14" r="1" fill="currentColor" stroke="none"/>',
+  coffee: '<path d="M17 8h2a3 3 0 0 1 0 6h-2"/><path d="M3 8h14v7a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="7" y1="2" x2="7" y2="5"/><line x1="11" y1="2" x2="11" y2="5"/>',
+  gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+  package: '<path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.3 7 12 12 20.7 7"/><line x1="12" y1="22" x2="12" y2="12"/>',
+  banknote: '<rect x="2" y="6" width="20" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/>',
+  award: '<circle cx="12" cy="9" r="6"/><path d="M9 14.5 8 22l4-2.5L16 22l-1-7.5"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2.5"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><line x1="2" y1="13" x2="22" y2="13"/>',
+  dollar: '<line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/>',
+};
+function svg(name, opts) {
+  const o = opts || {}, body = ICONS[name] || ICONS.tag;
+  const wh = o.size ? ` width="${o.size}" height="${o.size}"` : "";
+  const st = o.style ? ` style="${o.style}"` : "";
+  return `<svg${wh}${st} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+}
+function paintIcons(root) {
+  (root || document).querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = svg(el.dataset.icon); });
+}
+function hexA(hex, a) {
+  if (!/^#?[0-9a-fA-F]{6}$/.test(hex.replace("#", ""))) return hex;
+  const n = parseInt(hex.replace("#", ""), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+function catChip(type, id, size) {
+  const ci = catInfo(type, id), color = catColor(type, id);
+  return `<div class="ico" style="color:${color};background:${hexA(color, 0.15)}">${svg(ci.icon, size ? { size } : null)}</div>`;
+}
+
 /* ==================== CATEGORIES ==================== */
 const BASE_CATS = {
   expense: [
-    { id: "food", name: "Ăn uống", icon: "🍜" }, { id: "transport", name: "Di chuyển", icon: "🚗" },
-    { id: "shopping", name: "Mua sắm", icon: "🛍️" }, { id: "bills", name: "Hóa đơn", icon: "🧾" },
-    { id: "home", name: "Nhà cửa", icon: "🏠" }, { id: "health", name: "Sức khỏe", icon: "💊" },
-    { id: "edu", name: "Học tập", icon: "📚" }, { id: "fun", name: "Giải trí", icon: "🎮" },
-    { id: "coffee", name: "Cà phê", icon: "☕" }, { id: "gift", name: "Quà tặng", icon: "🎁" },
-    { id: "other_e", name: "Khác", icon: "📦" },
+    { id: "food", name: "Ăn uống", icon: "utensils" }, { id: "transport", name: "Di chuyển", icon: "car" },
+    { id: "shopping", name: "Mua sắm", icon: "bag" }, { id: "bills", name: "Hóa đơn", icon: "receipt" },
+    { id: "home", name: "Nhà cửa", icon: "home" }, { id: "health", name: "Sức khỏe", icon: "heart" },
+    { id: "edu", name: "Học tập", icon: "book" }, { id: "fun", name: "Giải trí", icon: "gamepad" },
+    { id: "coffee", name: "Cà phê", icon: "coffee" }, { id: "gift", name: "Quà tặng", icon: "gift" },
+    { id: "other_e", name: "Khác", icon: "package" },
   ],
   income: [
-    { id: "salary", name: "Lương", icon: "💵" }, { id: "bonus", name: "Thưởng", icon: "🎯" },
-    { id: "invest", name: "Đầu tư", icon: "📈" }, { id: "side", name: "Làm thêm", icon: "💼" },
-    { id: "gift_in", name: "Được tặng", icon: "🎁" }, { id: "other_i", name: "Khác", icon: "💰" },
+    { id: "salary", name: "Lương", icon: "banknote" }, { id: "bonus", name: "Thưởng", icon: "award" },
+    { id: "invest", name: "Đầu tư", icon: "trending-up" }, { id: "side", name: "Làm thêm", icon: "briefcase" },
+    { id: "gift_in", name: "Được tặng", icon: "gift" }, { id: "other_i", name: "Khác", icon: "dollar" },
   ],
 };
-const CAT_COLORS = ["#6366f1","#ec4899","#f59e0b","#10b981","#3b82f6","#ef4444","#8b5cf6","#14b8a6","#f97316","#84cc16","#06b6d4","#d946ef","#0ea5e9"];
+const CAT_COLORS = ["#6d63ff","#ec4899","#f59e0b","#10b981","#3b82f6","#ef4444","#8b5cf6","#14b8a6","#f97316","#84cc16","#06b6d4","#d946ef","#0ea5e9"];
+const PICK_ICONS = [["tag","Nhãn"],["home","Nhà"],["car","Xe"],["utensils","Ăn uống"],["bag","Mua sắm"],["coffee","Cà phê"],["heart","Sức khỏe"],["book","Học tập"],["gamepad","Giải trí"],["gift","Quà"],["briefcase","Công việc"],["banknote","Tiền"],["dollar","Tiền tệ"],["award","Thưởng"],["receipt","Hóa đơn"],["package","Khác"]];
 
 /* ==================== STORAGE ==================== */
 const K = { tx: "thuchi_data_v1", bud: "thuchi_budgets_v1", rec: "thuchi_recurring_v1", cc: "thuchi_customcats_v1", th: "thuchi_theme_v1" };
@@ -413,7 +507,6 @@ const CLOUD_ON = !!(window.SUPA_URL && window.SUPA_KEY && !/YOUR_/.test(window.S
 const SB = CLOUD_ON ? window.supabase.createClient(window.SUPA_URL, window.SUPA_KEY) : null;
 let user = null, offlineChosen = false, pushTimer = null;
 
-/* save wrappers also trigger cloud sync */
 function saveTx() { ls.set(K.tx, txs); cloudDirty(); }
 function saveBud() { ls.set(K.bud, budgets); cloudDirty(); }
 function saveRec() { ls.set(K.rec, recurring); cloudDirty(); }
@@ -438,7 +531,7 @@ async function cloudPull() {
     const { data, error } = await SB.from("user_data").select("data").eq("user_id", user.id).maybeSingle();
     if (error) { setSync("error"); console.warn(error.message); return; }
     if (data && data.data && Array.isArray(data.data.txs)) { applyState(data.data); setSync("ok"); }
-    else { await cloudPush(); } // chưa có dữ liệu trên cloud -> seed từ máy
+    else { await cloudPush(); }
   } catch (e) { setSync("error"); console.warn(e); }
 }
 function applyState(s) {
@@ -457,7 +550,7 @@ const onlyNum = (s) => +String(s).replace(/[^\d]/g, "");
 function todayStr() { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
 function curMonthStr() { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth()+1); }
 function allCats(type) { return BASE_CATS[type].concat(customCats[type] || []); }
-function catInfo(type, id) { return allCats(type).find(c => c.id === id) || { name: "Khác", icon: "📦" }; }
+function catInfo(type, id) { return allCats(type).find(c => c.id === id) || { name: "Khác", icon: "package" }; }
 function catColor(type, id) { const i = allCats(type).findIndex(c => c.id === id); return CAT_COLORS[(i < 0 ? 0 : i) % CAT_COLORS.length]; }
 function daysInMonth(y, m0) { return new Date(y, m0 + 1, 0).getDate(); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
@@ -467,7 +560,11 @@ function uid() { return Date.now().toString(36) + Math.floor(Math.random() * 1e6
 function flash(btn, msg) { const old = btn.textContent; btn.textContent = msg; btn.disabled = true; setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1300); }
 
 /* ==================== THEME ==================== */
-function applyTheme() { document.documentElement.setAttribute("data-theme", theme); $("btnTheme").textContent = theme === "dark" ? "🌙" : "☀️"; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = theme === "dark" ? "#0f172a" : "#f1f5f9"; }
+function applyTheme() {
+  document.documentElement.setAttribute("data-theme", theme);
+  $("btnTheme").innerHTML = svg(theme === "dark" ? "moon" : "sun");
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = theme === "dark" ? "#0a0e1a" : "#f6f9fc";
+}
 $("btnTheme").addEventListener("click", () => { theme = theme === "dark" ? "light" : "dark"; ls.set(K.th, theme); applyTheme(); });
 
 /* ==================== TABS ==================== */
@@ -481,12 +578,13 @@ $("tabs").addEventListener("click", (e) => {
 
 /* ==================== CATEGORY SELECTS ==================== */
 let txType = "expense", recType = "expense";
-function fillSelect(sel, type) { sel.innerHTML = ""; allCats(type).forEach(c => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.icon + "  " + c.name; sel.appendChild(o); }); }
+function fillSelect(sel, type) { sel.innerHTML = ""; allCats(type).forEach(c => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.name; sel.appendChild(o); }); }
 function fillTxCats() { fillSelect($("inCategory"), txType); }
 function fillRecCats() { fillSelect($("recCategory"), recType); }
 $("typeSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; txType = b.dataset.type; document.querySelectorAll("#typeSeg button").forEach(x => x.classList.toggle("active", x === b)); fillTxCats(); });
 $("recTypeSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; recType = b.dataset.type; document.querySelectorAll("#recTypeSeg button").forEach(x => x.classList.toggle("active", x === b)); fillRecCats(); });
 (function () { const s = $("recDay"); for (let d = 1; d <= 28; d++) { const o = document.createElement("option"); o.value = d; o.textContent = "Ngày " + d; s.appendChild(o); } s.value = 1; })();
+(function () { const s = $("ccIcon"); PICK_ICONS.forEach(([k, label]) => { const o = document.createElement("option"); o.value = k; o.textContent = label; s.appendChild(o); }); })();
 attachNumFormat($("inAmount")); attachNumFormat($("recAmount")); attachNumFormat($("budTotal"));
 
 /* ==================== ADD TRANSACTION ==================== */
@@ -522,36 +620,37 @@ function renderSummary() {
 function renderList() {
   const list = $("txList"), data = getFiltered();
   $("txCount").textContent = data.length ? data.length + " giao dịch" : "";
-  if (!data.length) { list.innerHTML = `<div class="empty"><div class="big">📭</div><div>Chưa có giao dịch nào</div></div>`; return; }
+  if (!data.length) { list.innerHTML = `<div class="empty"><div class="eico">${svg("inbox")}</div><div>Chưa có giao dịch nào</div></div>`; return; }
   list.innerHTML = "";
   for (const t of data) {
     const ci = catInfo(t.type, t.category), sign = t.type === "income" ? "+" : "−", cls = t.type === "income" ? "inc" : "exp";
     const dateFmt = new Date(t.date + "T00:00:00").toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-    const recTag = t.recurringId ? `<span class="tag">🔁 Định kỳ</span>` : "";
+    const recTag = t.recurringId ? `<span class="tag">${svg("repeat")} Định kỳ</span>` : "";
     const el = document.createElement("div"); el.className = "tx";
-    el.innerHTML = `<div class="ico">${ci.icon}</div><div class="info"><div class="cat">${ci.name}${recTag}</div><div class="meta">${dateFmt}${t.note ? " · " + escapeHtml(t.note) : ""}</div></div><div class="amt ${cls}">${sign}${fmt(t.amount)}</div><button class="del" title="Xóa">✕</button>`;
-    el.querySelector(".del").addEventListener("click", () => delTx(t.id));
+    el.innerHTML = `${catChip(t.type, t.category)}<div class="info"><div class="cat">${escapeHtml(ci.name)}${recTag}</div><div class="meta">${dateFmt}${t.note ? " · " + escapeHtml(t.note) : ""}</div></div><div class="amt ${cls}">${sign}${fmt(t.amount)}</div><button class="icon-del" title="Xóa">${svg("x")}</button>`;
+    el.querySelector(".icon-del").addEventListener("click", () => delTx(t.id));
     list.appendChild(el);
   }
 }
+ICONS.inbox = '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>';
 
 /* ==================== DONUT ==================== */
 function renderDonut() {
   const area = $("chartArea"), cm = curMonthStr();
   $("donutMonth").textContent = "Tháng " + cm.split("-")[1] + "/" + cm.split("-")[0];
   const exps = txs.filter(t => t.type === "expense" && t.date.startsWith(cm));
-  if (!exps.length) { area.innerHTML = `<div class="empty"><div class="big">📊</div><div>Chưa có chi tiêu tháng này</div></div>`; return; }
+  if (!exps.length) { area.innerHTML = `<div class="empty"><div class="eico">${svg("pie-chart")}</div><div>Chưa có chi tiêu tháng này</div></div>`; return; }
   const byCat = {}; exps.forEach(t => byCat[t.category] = (byCat[t.category] || 0) + t.amount);
   const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const total = entries.reduce((s, e) => s + e[1], 0);
-  const R = 70, C = 90, SW = 28, CIRC = 2 * Math.PI * R; let offset = 0, segs = "", legend = "";
+  const R = 70, C = 90, SW = 26, CIRC = 2 * Math.PI * R; let offset = 0, segs = "", legend = "";
   entries.forEach(([cat, val]) => {
     const frac = val / total, color = catColor("expense", cat), len = frac * CIRC;
-    segs += `<circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="${color}" stroke-width="${SW}" stroke-dasharray="${len} ${CIRC - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${C} ${C})"></circle>`;
+    segs += `<circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="${color}" stroke-width="${SW}" stroke-dasharray="${len} ${CIRC - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${C} ${C})" stroke-linecap="butt"></circle>`;
     offset += len; const ci = catInfo("expense", cat);
-    legend += `<div class="row"><span class="dot" style="background:${color}"></span><span class="lname">${ci.icon} ${ci.name}</span><span class="lval">${Math.round(frac*100)}% · ${fmt(val)}</span></div>`;
+    legend += `<div class="row"><span class="dot" style="background:${color}"></span><span class="lname">${escapeHtml(ci.name)}</span><span class="lval">${Math.round(frac*100)}% · ${fmt(val)}</span></div>`;
   });
-  area.innerHTML = `<div class="chart-wrap"><svg width="${C*2}" height="${C*2}" viewBox="0 0 ${C*2} ${C*2}">${segs}<text x="${C}" y="${C-6}" text-anchor="middle" fill="var(--muted)" font-size="11">Tổng chi</text><text x="${C}" y="${C+14}" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="700">${fmt(total)}</text></svg><div class="legend">${legend}</div></div>`;
+  area.innerHTML = `<div class="chart-wrap"><svg width="${C*2}" height="${C*2}" viewBox="0 0 ${C*2} ${C*2}">${segs}<text x="${C}" y="${C-5}" text-anchor="middle" fill="var(--muted)" font-size="11" font-family="Inter,sans-serif">Tổng chi</text><text x="${C}" y="${C+15}" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="600" font-family="Inter,sans-serif">${fmt(total)}</text></svg><div class="legend">${legend}</div></div>`;
 }
 
 /* ==================== TREND ==================== */
@@ -560,18 +659,18 @@ function renderTrend() {
   const area = $("trendArea"), months = lastMonths(6);
   const data = months.map(m => ({ m, inc: sumWhere(t => t.type === "income" && t.date.startsWith(m)), exp: sumWhere(t => t.type === "expense" && t.date.startsWith(m)) }));
   const maxV = Math.max(1, ...data.map(d => Math.max(d.inc, d.exp)));
-  const W = 600, H = 230, padL = 8, padB = 28, padT = 12, chartH = H - padB - padT;
-  const groupW = (W - padL * 2) / months.length, barW = Math.min(26, groupW / 3.2), gap = 5;
+  const W = 600, H = 230, padL = 8, padB = 28, padT = 14, chartH = H - padB - padT;
+  const groupW = (W - padL * 2) / months.length, barW = Math.min(24, groupW / 3.4), gap = 6;
   let bars = "";
-  data.forEach((d, i) => {
-    const gx = padL + i * groupW + groupW / 2;
+  data.forEach((d) => {
+    const gx = padL + months.indexOf(d.m) * groupW + groupW / 2;
     const hInc = (d.inc / maxV) * chartH, hExp = (d.exp / maxV) * chartH;
     const xInc = gx - barW - gap / 2, xExp = gx + gap / 2;
-    bars += `<rect x="${xInc}" y="${padT + chartH - hInc}" width="${barW}" height="${hInc}" rx="4" fill="var(--income)"><title>${monthLabel(d.m)} • Thu: ${fmt(d.inc)}</title></rect>`;
-    bars += `<rect x="${xExp}" y="${padT + chartH - hExp}" width="${barW}" height="${hExp}" rx="4" fill="var(--expense)"><title>${monthLabel(d.m)} • Chi: ${fmt(d.exp)}</title></rect>`;
-    if (d.inc > 0) bars += `<text x="${xInc + barW/2}" y="${padT + chartH - hInc - 4}" text-anchor="middle" fill="var(--muted)" font-size="9">${fmtK(d.inc)}</text>`;
-    if (d.exp > 0) bars += `<text x="${xExp + barW/2}" y="${padT + chartH - hExp - 4}" text-anchor="middle" fill="var(--muted)" font-size="9">${fmtK(d.exp)}</text>`;
-    bars += `<text x="${gx}" y="${H - 9}" text-anchor="middle" fill="var(--muted)" font-size="11">${monthLabel(d.m)}</text>`;
+    bars += `<rect x="${xInc}" y="${padT + chartH - hInc}" width="${barW}" height="${hInc}" rx="5" fill="var(--income)"><title>${monthLabel(d.m)} • Thu: ${fmt(d.inc)}</title></rect>`;
+    bars += `<rect x="${xExp}" y="${padT + chartH - hExp}" width="${barW}" height="${hExp}" rx="5" fill="var(--expense)"><title>${monthLabel(d.m)} • Chi: ${fmt(d.exp)}</title></rect>`;
+    if (d.inc > 0) bars += `<text x="${xInc + barW/2}" y="${padT + chartH - hInc - 5}" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="Inter,sans-serif">${fmtK(d.inc)}</text>`;
+    if (d.exp > 0) bars += `<text x="${xExp + barW/2}" y="${padT + chartH - hExp - 5}" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="Inter,sans-serif">${fmtK(d.exp)}</text>`;
+    bars += `<text x="${gx}" y="${H - 9}" text-anchor="middle" fill="var(--muted)" font-size="11" font-family="Inter,sans-serif">${monthLabel(d.m)}</text>`;
   });
   area.innerHTML = `<svg class="trend-svg" viewBox="0 0 ${W} ${H}">${bars}</svg><div class="trend-legend"><span><span class="dot" style="background:var(--income)"></span>Thu nhập</span><span><span class="dot" style="background:var(--expense)"></span>Chi tiêu</span></div>`;
 }
@@ -585,42 +684,43 @@ function renderTips() {
   const curExp = sumWhere(t => t.type === "expense" && t.date.startsWith(cm));
   const prevExp = sumWhere(t => t.type === "expense" && t.date.startsWith(pm));
   const tips = [];
-  if (!txs.length) tips.push({ tone: "info", icon: "👋", text: "Hãy thêm giao dịch đầu tiên ở tab <b>Giao dịch</b> để bắt đầu theo dõi tài chính nhé!" });
+  if (!txs.length) tips.push({ tone: "info", text: "Hãy thêm giao dịch đầu tiên ở tab <b>Giao dịch</b> để bắt đầu theo dõi tài chính nhé!" });
   if (curInc > 0) {
     const rate = (curInc - curExp) / curInc * 100;
-    if (rate < 0) tips.push({ tone: "bad", icon: "⚠️", text: `Tháng này bạn <b>chi vượt thu ${fmt(curExp - curInc)}</b>. Hãy rà soát và cắt giảm các khoản chưa cần thiết.` });
-    else if (rate < 10) tips.push({ tone: "warn", icon: "💡", text: `Tỷ lệ tiết kiệm mới đạt <b>${rate.toFixed(0)}%</b>. Mục tiêu lý tưởng là để dành tối thiểu 20% thu nhập.` });
-    else if (rate >= 20) tips.push({ tone: "good", icon: "🎉", text: `Xuất sắc! Bạn tiết kiệm được <b>${rate.toFixed(0)}%</b> thu nhập (${fmt(curInc - curExp)}) tháng này.` });
-    else tips.push({ tone: "good", icon: "👍", text: `Bạn đang tiết kiệm <b>${rate.toFixed(0)}%</b> thu nhập tháng này.` });
+    if (rate < 0) tips.push({ tone: "bad", text: `Tháng này bạn <b>chi vượt thu ${fmt(curExp - curInc)}</b>. Hãy rà soát và cắt giảm các khoản chưa cần thiết.` });
+    else if (rate < 10) tips.push({ tone: "warn", text: `Tỷ lệ tiết kiệm mới đạt <b>${rate.toFixed(0)}%</b>. Mục tiêu lý tưởng là để dành tối thiểu 20% thu nhập.` });
+    else if (rate >= 20) tips.push({ tone: "good", text: `Xuất sắc! Bạn tiết kiệm được <b>${rate.toFixed(0)}%</b> thu nhập (${fmt(curInc - curExp)}) tháng này.` });
+    else tips.push({ tone: "good", text: `Bạn đang tiết kiệm <b>${rate.toFixed(0)}%</b> thu nhập tháng này.` });
   }
   if (budgets.total > 0) {
     const pct = curExp / budgets.total * 100;
-    if (pct >= 100) tips.push({ tone: "bad", icon: "🚨", text: `Đã <b>vượt ngân sách tháng ${fmt(curExp - budgets.total)}</b> (${pct.toFixed(0)}% giới hạn).` });
-    else if (pct >= 80) tips.push({ tone: "warn", icon: "⏳", text: `Đã dùng <b>${pct.toFixed(0)}%</b> ngân sách tháng, chỉ còn ${fmt(budgets.total - curExp)}.` });
-    else tips.push({ tone: "good", icon: "✅", text: `Còn <b>${fmt(budgets.total - curExp)}</b> trong ngân sách tháng (đã dùng ${pct.toFixed(0)}%).` });
+    if (pct >= 100) tips.push({ tone: "bad", text: `Đã <b>vượt ngân sách tháng ${fmt(curExp - budgets.total)}</b> (${pct.toFixed(0)}% giới hạn).` });
+    else if (pct >= 80) tips.push({ tone: "warn", text: `Đã dùng <b>${pct.toFixed(0)}%</b> ngân sách tháng, chỉ còn ${fmt(budgets.total - curExp)}.` });
+    else tips.push({ tone: "good", text: `Còn <b>${fmt(budgets.total - curExp)}</b> trong ngân sách tháng (đã dùng ${pct.toFixed(0)}%).` });
   }
   const overCats = [];
   for (const [cid, lim] of Object.entries(budgets.cats || {})) {
     if (!lim) continue;
     const spent = sumWhere(t => t.type === "expense" && t.category === cid && t.date.startsWith(cm));
-    if (spent > lim) { const ci = catInfo("expense", cid); overCats.push(`${ci.icon} ${ci.name} (+${fmt(spent - lim)})`); }
+    if (spent > lim) { const ci = catInfo("expense", cid); overCats.push(`${ci.name} (+${fmt(spent - lim)})`); }
   }
-  if (overCats.length) tips.push({ tone: "bad", icon: "📛", text: `Vượt ngân sách danh mục: <b>${overCats.slice(0, 3).join(", ")}</b>.` });
+  if (overCats.length) tips.push({ tone: "bad", text: `Vượt ngân sách danh mục: <b>${overCats.slice(0, 3).join(", ")}</b>.` });
   const byCat = {}; txs.filter(t => t.type === "expense" && t.date.startsWith(cm)).forEach(t => byCat[t.category] = (byCat[t.category] || 0) + t.amount);
   const top = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
-  if (top && curExp > 0) { const ci = catInfo("expense", top[0]); tips.push({ tone: "info", icon: ci.icon, text: `Chi nhiều nhất cho <b>${ci.name}</b>: ${fmt(top[1])} (${Math.round(top[1] / curExp * 100)}% chi tiêu).` }); }
+  if (top && curExp > 0) { const ci = catInfo("expense", top[0]); tips.push({ tone: "info", text: `Chi nhiều nhất cho <b>${ci.name}</b>: ${fmt(top[1])} (${Math.round(top[1] / curExp * 100)}% chi tiêu).` }); }
   if (prevExp > 0 && curExp > 0) {
     const diff = (curExp - prevExp) / prevExp * 100;
-    if (diff > 15) tips.push({ tone: "warn", icon: "📈", text: `Chi tiêu <b>tăng ${diff.toFixed(0)}%</b> so với tháng trước (${fmt(prevExp)} → ${fmt(curExp)}).` });
-    else if (diff < -15) tips.push({ tone: "good", icon: "📉", text: `Chi tiêu <b>giảm ${Math.abs(diff).toFixed(0)}%</b> so với tháng trước. Giỏi lắm! 👏` });
+    if (diff > 15) tips.push({ tone: "warn", text: `Chi tiêu <b>tăng ${diff.toFixed(0)}%</b> so với tháng trước (${fmt(prevExp)} → ${fmt(curExp)}).` });
+    else if (diff < -15) tips.push({ tone: "good", text: `Chi tiêu <b>giảm ${Math.abs(diff).toFixed(0)}%</b> so với tháng trước. Rất tốt!` });
   }
   if (curExp > 0) {
     const day = now.getDate(), dim = daysInMonth(now.getFullYear(), now.getMonth());
-    tips.push({ tone: "info", icon: "📅", text: `Trung bình <b>${fmt(curExp / day)}/ngày</b>. Với nhịp này, cả tháng dự kiến ~<b>${fmt(curExp / day * dim)}</b>.` });
-    if (!budgets.total) tips.push({ tone: "info", icon: "🎯", text: `Mẹo: đặt <b>ngân sách tháng</b> ở tab Ngân sách để được cảnh báo khi chi vượt mức.` });
+    tips.push({ tone: "info", text: `Trung bình <b>${fmt(curExp / day)}/ngày</b>. Với nhịp này, cả tháng dự kiến ~<b>${fmt(curExp / day * dim)}</b>.` });
+    if (!budgets.total) tips.push({ tone: "info", text: `Mẹo: đặt <b>ngân sách tháng</b> ở tab Ngân sách để được cảnh báo khi chi vượt mức.` });
   }
-  if (!recurring.length && txs.length) tips.push({ tone: "info", icon: "🔁", text: `Có khoản thu/chi cố định hàng tháng? Thêm vào tab <b>Định kỳ</b> để tự động ghi nhận.` });
-  area.innerHTML = tips.map(t => `<div class="tip ${t.tone}"><div class="ti">${t.icon}</div><div>${t.text}</div></div>`).join("");
+  if (!recurring.length && txs.length) tips.push({ tone: "info", text: `Có khoản thu/chi cố định hàng tháng? Thêm vào tab <b>Định kỳ</b> để tự động ghi nhận.` });
+  const toneIcon = { good: "check", warn: "alert-triangle", bad: "alert-octagon", info: "info" };
+  area.innerHTML = tips.map(t => `<div class="tip ${t.tone}"><span class="ti">${svg(toneIcon[t.tone])}</span><div>${t.text}</div></div>`).join("");
 }
 
 /* ==================== BUDGET ==================== */
@@ -632,8 +732,8 @@ function renderBudget() {
   const tb = $("budTotalBar");
   if (budgets.total > 0) {
     const pct = Math.min(100, curExp / budgets.total * 100), over = curExp > budgets.total;
-    const color = over ? "var(--expense)" : pct >= 80 ? "#f59e0b" : "var(--income)";
-    tb.innerHTML = `<div class="bud-top"><span>${over ? "🚨 Đã chi" : "Đã chi"}: <b>${fmt(curExp)}</b></span><span class="spent">/ ${fmt(budgets.total)} (${(curExp/budgets.total*100).toFixed(0)}%)</span></div><div class="bar"><div style="width:${pct}%;background:${color}"></div></div>${over ? `<p class="hint" style="color:var(--expense)">Vượt ngân sách ${fmt(curExp - budgets.total)}!</p>` : `<p class="hint">Còn lại ${fmt(budgets.total - curExp)} cho tháng này.</p>`}`;
+    const color = over ? "var(--expense)" : pct >= 80 ? "var(--warn-fg)" : "var(--income)";
+    tb.innerHTML = `<div class="bud-top"><span>Đã chi: <b>${fmt(curExp)}</b></span><span class="spent">/ ${fmt(budgets.total)} (${(curExp/budgets.total*100).toFixed(0)}%)</span></div><div class="bar"><div style="width:${pct}%;background:${color}"></div></div>${over ? `<p class="hint" style="color:var(--expense)">Vượt ngân sách ${fmt(curExp - budgets.total)}.</p>` : `<p class="hint">Còn lại ${fmt(budgets.total - curExp)} cho tháng này.</p>`}`;
   } else tb.innerHTML = `<p class="hint">Chưa đặt ngân sách tổng. Nhập số tiền phía trên và bấm Lưu.</p>`;
   const wrap = $("budCats"); wrap.innerHTML = "";
   allCats("expense").forEach(c => {
@@ -643,10 +743,10 @@ function renderBudget() {
     let barHtml;
     if (lim > 0) {
       const pct = Math.min(100, spent / lim * 100), over = spent > lim;
-      const color = over ? "var(--expense)" : pct >= 80 ? "#f59e0b" : "var(--income)";
+      const color = over ? "var(--expense)" : pct >= 80 ? "var(--warn-fg)" : "var(--income)";
       barHtml = `<div class="bud-top"><span>${escapeHtml(c.name)}</span><span class="spent">${fmt(spent)} / ${fmt(lim)}</span></div><div class="bar"><div style="width:${pct}%;background:${color}"></div></div>`;
     } else barHtml = `<div class="bud-top"><span>${escapeHtml(c.name)}</span><span class="spent">Đã chi ${fmt(spent)}</span></div><div class="bar"><div style="width:0%"></div></div>`;
-    row.innerHTML = `<div class="ico">${c.icon}</div><div class="bud-main">${barHtml}</div><input class="bud-input" data-cat="${c.id}" inputmode="numeric" placeholder="0" value="${lim ? new Intl.NumberFormat("vi-VN").format(lim) : ""}" />`;
+    row.innerHTML = `${catChip("expense", c.id)}<div class="bud-main">${barHtml}</div><input class="bud-input" data-cat="${c.id}" inputmode="numeric" placeholder="0" value="${lim ? new Intl.NumberFormat("vi-VN").format(lim) : ""}" />`;
     wrap.appendChild(row);
   });
   wrap.querySelectorAll(".bud-input").forEach(attachNumFormat);
@@ -654,7 +754,7 @@ function renderBudget() {
 $("btnSaveBudget").addEventListener("click", () => {
   budgets.total = onlyNum($("budTotal").value); budgets.cats = {};
   $("budCats").querySelectorAll(".bud-input").forEach(inp => { const v = onlyNum(inp.value); if (v) budgets.cats[inp.dataset.cat] = v; });
-  saveBud(); render(); flash($("btnSaveBudget"), "✓ Đã lưu ngân sách");
+  saveBud(); render(); flash($("btnSaveBudget"), "✓ Đã lưu");
 });
 $("budTotal").addEventListener("keydown", e => { if (e.key === "Enter") $("btnSaveBudget").click(); });
 
@@ -688,24 +788,24 @@ function delRec(id) { if (!confirm("Xóa giao dịch định kỳ này? (Các gi
 function nextRecDate(r) { const now = new Date(); let y = now.getFullYear(), m0 = now.getMonth(); if (now.getDate() >= r.day) { m0++; if (m0 > 11) { m0 = 0; y++; } } const day = Math.min(r.day, daysInMonth(y, m0)); return pad2(day) + "/" + pad2(m0 + 1) + "/" + y; }
 function renderRecList() {
   const wrap = $("recList");
-  if (!recurring.length) { wrap.innerHTML = `<div class="empty"><div class="big">🔁</div><div>Chưa có giao dịch định kỳ</div></div>`; return; }
+  if (!recurring.length) { wrap.innerHTML = `<div class="empty"><div class="eico">${svg("repeat")}</div><div>Chưa có giao dịch định kỳ</div></div>`; return; }
   wrap.innerHTML = "";
   recurring.forEach(r => {
     const ci = catInfo(r.type, r.category), cls = r.type === "income" ? "inc" : "exp", sign = r.type === "income" ? "+" : "−";
     const row = document.createElement("div"); row.className = "list-row";
-    row.innerHTML = `<div class="ico">${ci.icon}</div><div class="grow"><div class="t">${ci.name}${r.note ? " · " + escapeHtml(r.note) : ""}</div><div class="s">Hàng tháng vào ngày ${r.day} · Lần tới: ${nextRecDate(r)}</div></div><div class="row-amt ${cls}">${sign}${fmt(r.amount)}</div><button class="mini-del" title="Xóa">✕</button>`;
-    row.querySelector(".mini-del").addEventListener("click", () => delRec(r.id));
+    row.innerHTML = `${catChip(r.type, r.category)}<div class="grow"><div class="t">${escapeHtml(ci.name)}${r.note ? " · " + escapeHtml(r.note) : ""}</div><div class="s">Hàng tháng vào ngày ${r.day} · Lần tới: ${nextRecDate(r)}</div></div><div class="row-amt ${cls}">${sign}${fmt(r.amount)}</div><button class="icon-del" title="Xóa">${svg("x")}</button>`;
+    row.querySelector(".icon-del").addEventListener("click", () => delRec(r.id));
     wrap.appendChild(row);
   });
 }
 
 /* ==================== CUSTOM CATEGORIES ==================== */
 $("btnAddCat").addEventListener("click", () => {
-  const type = $("ccType").value, icon = $("ccIcon").value.trim() || "🏷️", name = $("ccName").value.trim();
+  const type = $("ccType").value, icon = $("ccIcon").value || "tag", name = $("ccName").value.trim();
   if (!name) { alert("Nhập tên danh mục!"); return; }
   customCats[type] = customCats[type] || [];
   customCats[type].push({ id: "cc_" + uid(), name, icon, custom: true });
-  saveCC(); $("ccIcon").value = ""; $("ccName").value = "";
+  saveCC(); $("ccName").value = "";
   fillTxCats(); fillRecCats(); render(); flash($("btnAddCat"), "✓ Đã thêm");
 });
 function delCustomCat(type, id) { if (!confirm("Xóa danh mục này? Giao dịch cũ sẽ hiển thị là \"Khác\".")) return; customCats[type] = customCats[type].filter(c => c.id !== id); saveCC(); fillTxCats(); fillRecCats(); render(); }
@@ -715,8 +815,8 @@ function renderCustomList() {
   wrap.innerHTML = "";
   all.forEach(([type, c]) => {
     const row = document.createElement("div"); row.className = "list-row";
-    row.innerHTML = `<div class="ico">${c.icon}</div><div class="grow"><div class="t">${escapeHtml(c.name)}</div><div class="s">${type === "income" ? "Thu nhập" : "Chi tiêu"}</div></div><button class="mini-del" title="Xóa">✕</button>`;
-    row.querySelector(".mini-del").addEventListener("click", () => delCustomCat(type, c.id));
+    row.innerHTML = `${catChip(type, c.id)}<div class="grow"><div class="t">${escapeHtml(c.name)}</div><div class="s">${type === "income" ? "Thu nhập" : "Chi tiêu"}</div></div><button class="icon-del" title="Xóa">${svg("x")}</button>`;
+    row.querySelector(".icon-del").addEventListener("click", () => delCustomCat(type, c.id));
     wrap.appendChild(row);
   });
 }
@@ -724,9 +824,9 @@ function renderCustomList() {
 /* ==================== CLOUD STATUS (settings) ==================== */
 function renderCloudStatus() {
   const el = $("cloudStatus");
-  if (!CLOUD_ON) { el.innerHTML = `<span class="badge">⚪ Chưa cấu hình</span><p class="hint">App đang chạy <b>offline</b> (lưu trên máy). Để đồng bộ đám mây, điền thông tin Supabase vào file <code>config.js</code> (xem README.md).</p>`; return; }
-  if (user) el.innerHTML = `<span class="badge">🟢 Đang đồng bộ</span><p class="hint">Đăng nhập: <b>${escapeHtml(user.email || "")}</b>. Dữ liệu tự động lưu lên đám mây và đồng bộ mọi thiết bị.</p>`;
-  else el.innerHTML = `<span class="badge">🟡 Đã cấu hình, chưa đăng nhập</span><p class="hint">Bạn đang dùng offline. <a href="#" id="goLogin" style="color:var(--primary)">Đăng nhập để đồng bộ →</a></p>`;
+  if (!CLOUD_ON) { el.innerHTML = `<span class="badge"><span class="sdot" style="background:var(--muted-2)"></span> Chưa cấu hình</span><p class="hint">App đang chạy <b>offline</b> (lưu trên máy). Để đồng bộ đám mây, điền thông tin Supabase vào file <code>config.js</code>.</p>`; return; }
+  if (user) el.innerHTML = `<span class="badge"><span class="sdot" style="background:var(--income)"></span> Đang đồng bộ</span><p class="hint">Đăng nhập: <b>${escapeHtml(user.email || "")}</b>. Dữ liệu tự động lưu lên đám mây và đồng bộ mọi thiết bị.</p>`;
+  else el.innerHTML = `<span class="badge"><span class="sdot" style="background:var(--warn-fg)"></span> Đã cấu hình, chưa đăng nhập</span><p class="hint">Bạn đang dùng offline. <a href="#" id="goLogin" style="color:var(--primary);font-weight:600">Đăng nhập để đồng bộ →</a></p>`;
   const g = $("goLogin"); if (g) g.addEventListener("click", (e) => { e.preventDefault(); offlineChosen = false; showAuth(); });
 }
 
@@ -816,21 +916,16 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 
 /* ==================== INIT ==================== */
 (async function init() {
+  paintIcons();
   applyTheme();
   $("inDate").value = todayStr();
   fillTxCats(); fillRecCats();
   processRecurring();
   render();
 
-  // Xử lý hash từ Supabase (error hoặc access_token sau email confirm)
   const hash = location.hash;
   if (hash.includes("error=")) {
-    // Xoá hash khỏi URL để tránh lỗi lần sau
     history.replaceState(null, "", location.pathname);
-    const desc = new URLSearchParams(hash.slice(1)).get("error_description") || "";
-    if (desc.toLowerCase().includes("expired")) {
-      // Link xác nhận hết hạn — tài khoản có thể đã tồn tại, chỉ cần đăng nhập
-    }
   }
 
   if (SB) {
