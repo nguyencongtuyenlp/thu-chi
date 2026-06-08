@@ -229,6 +229,9 @@
   .auth-err { font-size: 13px; min-height: 18px; margin-bottom: 8px; text-align: left; line-height: 1.45; }
   .linkbtn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; margin-top: 16px; font-family: inherit; }
   .linkbtn:hover { color: var(--text); text-decoration: underline; }
+  .auth-links { display: flex; justify-content: center; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
+  .auth-links .linkbtn { margin-top: 0; }
+  .linkbtn.off { display: block; width: 100%; margin-top: 10px; }
 
   /* ===== LIQUID GLASS (iOS 26) ===== */
   #appBg { position: fixed; inset: 0; z-index: -2; background: var(--bg); background-size: cover; background-position: center; transition: background-image .45s ease, background-color .45s ease; }
@@ -446,14 +449,20 @@
 <div class="auth-overlay" id="authOverlay" hidden>
   <div class="auth-card">
     <div class="logo big"><img src="icon.jpg" alt="Logo" /></div>
-    <h2>Quản Lý Thu Chi</h2>
-    <p class="muted">Đăng nhập để đồng bộ dữ liệu trên mọi thiết bị</p>
-    <div class="field"><label>Email</label><input type="email" id="authEmail" placeholder="ban@email.com" autocomplete="username" /></div>
-    <div class="field"><label>Mật khẩu</label><input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password" /></div>
+    <h2 id="authTitle">Đăng nhập</h2>
+    <p class="muted" id="authSub">Đăng nhập để đồng bộ dữ liệu trên mọi thiết bị</p>
+    <div class="field" id="fEmail"><label>Email</label><input type="email" id="authEmail" placeholder="ban@email.com" autocomplete="username" /></div>
+    <div class="field" id="fPass"><label>Mật khẩu</label><input type="password" id="authPass" placeholder="••••••••" autocomplete="current-password" /></div>
+    <div class="field" id="fNew" hidden><label>Mật khẩu mới</label><input type="password" id="authNew" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" /></div>
+    <div class="field" id="fNew2" hidden><label>Nhập lại mật khẩu mới</label><input type="password" id="authNew2" placeholder="••••••••" autocomplete="new-password" /></div>
     <div class="auth-err" id="authErr"></div>
-    <button class="btn-add" id="btnLogin">Đăng nhập</button>
-    <button class="btn" id="btnSignup" style="width:100%;margin-top:9px;justify-content:center;">Tạo tài khoản mới</button>
-    <br><button class="linkbtn" id="btnOffline">Dùng offline (không đồng bộ) →</button>
+    <button class="btn-add" id="authPrimary">Đăng nhập</button>
+    <div class="auth-links">
+      <button class="linkbtn" id="lnkForgot">Quên mật khẩu?</button>
+      <button class="linkbtn" id="lnkSignup">Tạo tài khoản mới</button>
+      <button class="linkbtn" id="lnkBack" hidden>← Đăng nhập</button>
+    </div>
+    <button class="linkbtn off" id="btnOffline">Dùng offline (không đồng bộ) →</button>
   </div>
 </div>
 
@@ -994,7 +1003,7 @@ $("btnClear").addEventListener("click", () => {
 });
 
 /* ==================== AUTH ==================== */
-function showAuth() { $("authOverlay").hidden = false; }
+function showAuth(mode) { $("authOverlay").hidden = false; setAuthMode(mode || "login"); }
 function hideAuth() { $("authOverlay").hidden = true; }
 function showAccount(email) { $("account").hidden = false; $("accEmail").textContent = email || ""; setSync("ok"); }
 function hideAccount() { $("account").hidden = true; }
@@ -1005,37 +1014,87 @@ async function afterLogin() {
   hideAuth(); showAccount(user.email); await cloudPull(); renderCloudStatus();
 }
 
+let authMode = "login";
+const AUTH_LABEL = { login: "Đăng nhập", signup: "Đăng ký", forgot: "Gửi liên kết đặt lại", reset: "Đổi mật khẩu" };
+function setAuthMode(m) {
+  authMode = m; authErr("");
+  const meta = {
+    login:  ["Đăng nhập", "Đăng nhập để đồng bộ dữ liệu trên mọi thiết bị"],
+    signup: ["Tạo tài khoản", "Tạo tài khoản miễn phí để lưu & đồng bộ dữ liệu"],
+    forgot: ["Quên mật khẩu", "Nhập email — chúng tôi sẽ gửi liên kết đặt lại mật khẩu"],
+    reset:  ["Đặt mật khẩu mới", "Nhập mật khẩu mới cho tài khoản của bạn"],
+  }[m] || ["Đăng nhập", ""];
+  $("authTitle").textContent = meta[0]; $("authSub").textContent = meta[1];
+  $("authPrimary").textContent = AUTH_LABEL[m];
+  $("fEmail").hidden = (m === "reset");
+  $("fPass").hidden = (m !== "login" && m !== "signup");
+  $("fNew").hidden = (m !== "reset");
+  $("fNew2").hidden = (m !== "reset");
+  $("lnkForgot").hidden = (m !== "login");
+  $("lnkSignup").hidden = (m !== "login");
+  $("lnkBack").hidden = (m !== "signup" && m !== "forgot");
+  $("btnOffline").hidden = (m === "reset");
+}
+function authBusy(on, txt) { const b = $("authPrimary"); b.disabled = on; b.textContent = on ? txt : AUTH_LABEL[authMode]; }
+
 if (SB) {
-  $("btnLogin").addEventListener("click", async () => {
+  async function doLogin() {
     authErr(""); const email = $("authEmail").value.trim(), password = $("authPass").value;
     if (!email || !password) { authErr("Nhập email và mật khẩu."); return; }
-    const btn = $("btnLogin"); btn.disabled = true; btn.textContent = "Đang đăng nhập...";
+    authBusy(true, "Đang đăng nhập...");
     const { data, error } = await SB.auth.signInWithPassword({ email, password });
-    btn.disabled = false; btn.textContent = "Đăng nhập";
-    if (error) {
-      authErr(error.message.includes("Invalid") || error.message.includes("credentials") ? "Sai email hoặc mật khẩu." : error.message);
-    } else if (data && data.session) {
-      user = data.session.user;
-      await afterLogin();
-    }
-  });
-  $("btnSignup").addEventListener("click", async () => {
+    authBusy(false);
+    if (error) authErr(/invalid|credentials/i.test(error.message) ? "Sai email hoặc mật khẩu." : error.message);
+    else if (data && data.session) { user = data.session.user; await afterLogin(); }
+  }
+  async function doSignup() {
     authErr(""); const email = $("authEmail").value.trim(), password = $("authPass").value;
-    if (!email) { authErr("Vui lòng nhập email."); $("authEmail").focus(); return; }
-    if (!/^\S+@\S+\.\S+$/.test(email)) { authErr("Email chưa đúng định dạng."); $("authEmail").focus(); return; }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { authErr("Email chưa đúng định dạng."); $("authEmail").focus(); return; }
     if (password.length < 6) { authErr("Mật khẩu cần tối thiểu 6 ký tự."); $("authPass").focus(); return; }
-    const btn = $("btnSignup"); btn.disabled = true; btn.textContent = "Đang tạo...";
+    authBusy(true, "Đang tạo...");
     const redirectTo = location.origin.includes("localhost") ? undefined : location.origin;
     const { data, error } = await SB.auth.signUp({ email, password, options: redirectTo ? { emailRedirectTo: redirectTo } : undefined });
-    btn.disabled = false; btn.textContent = "Tạo tài khoản mới";
+    authBusy(false);
     if (error) { authErr(error.message); return; }
     if (data.session) { user = data.session.user; await afterLogin(); }
-    else authErr("✅ Đã tạo tài khoản! Hãy kiểm tra email để xác nhận rồi bấm Đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để vào ngay không cần xác nhận).", true);
+    else authErr("✅ Đã tạo tài khoản! Kiểm tra email để xác nhận rồi đăng nhập.", true);
+  }
+  async function doForgot() {
+    authErr(""); const email = $("authEmail").value.trim();
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { authErr("Nhập email hợp lệ để nhận liên kết."); $("authEmail").focus(); return; }
+    authBusy(true, "Đang gửi...");
+    const redirectTo = location.origin.includes("localhost") ? undefined : location.origin;
+    const { error } = await SB.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined);
+    authBusy(false);
+    if (error) authErr(error.message);
+    else authErr("✅ Đã gửi email! Mở email và bấm liên kết để đặt mật khẩu mới (kiểm tra cả mục Spam/Quảng cáo).", true);
+  }
+  async function doReset() {
+    authErr(""); const p1 = $("authNew").value, p2 = $("authNew2").value;
+    if (p1.length < 6) { authErr("Mật khẩu mới cần tối thiểu 6 ký tự."); $("authNew").focus(); return; }
+    if (p1 !== p2) { authErr("Hai mật khẩu không khớp."); $("authNew2").focus(); return; }
+    authBusy(true, "Đang đổi...");
+    const { error } = await SB.auth.updateUser({ password: p1 });
+    authBusy(false);
+    if (error) { authErr(/different|same/i.test(error.message) ? "Mật khẩu mới phải khác mật khẩu cũ." : error.message); return; }
+    authErr("✅ Đổi mật khẩu thành công!", true);
+    history.replaceState(null, "", location.pathname);
+    try { const { data } = await SB.auth.getSession(); if (data && data.session) { user = data.session.user; await afterLogin(); } } catch (e) {}
+  }
+  $("authPrimary").addEventListener("click", () => {
+    if (authMode === "login") doLogin();
+    else if (authMode === "signup") doSignup();
+    else if (authMode === "forgot") doForgot();
+    else if (authMode === "reset") doReset();
   });
+  $("lnkForgot").addEventListener("click", () => setAuthMode("forgot"));
+  $("lnkSignup").addEventListener("click", () => setAuthMode("signup"));
+  $("lnkBack").addEventListener("click", () => setAuthMode("login"));
   $("btnOffline").addEventListener("click", () => { offlineChosen = true; hideAuth(); });
-  ["authEmail", "authPass"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); }));
+  ["authEmail", "authPass", "authNew", "authNew2"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("authPrimary").click(); }));
   $("btnLogout").addEventListener("click", async () => { await SB.auth.signOut(); });
-  SB.auth.onAuthStateChange((_ev, session) => {
+  SB.auth.onAuthStateChange((ev, session) => {
+    if (ev === "PASSWORD_RECOVERY") { offlineChosen = false; showAuth("reset"); return; }
     if (session && session.user) { user = session.user; afterLogin(); }
     else {
       user = null; currentUid = null; dirty = false;
@@ -1043,7 +1102,7 @@ if (SB) {
       txs = []; budgets = { total: 0, cats: {} }; recurring = []; customCats = { expense: [], income: [] }; appearance = { type: "preset", key: "aurora" };
       [K.tx, K.bud, K.rec, K.cc, K.ap, K.dirty].forEach(k => localStorage.removeItem(k));
       fillTxCats(); fillRecCats(); applyBg(); hideAccount(); render();
-      if (!offlineChosen) showAuth();
+      if (!offlineChosen) showAuth("login");
     }
   });
 }
@@ -1168,16 +1227,18 @@ document.addEventListener("pointercancel", glowEnd, { passive: true });
   $("inDate").value = todayStr();
   fillTxCats(); fillRecCats();
 
-  const hash = location.hash;
-  if (hash.includes("error=")) history.replaceState(null, "", location.pathname);
+  const initialHash = location.hash;
+  const isRecovery = /type=recovery/.test(initialHash);
+  if (!isRecovery && initialHash.includes("error=")) history.replaceState(null, "", location.pathname);
 
   if (SB) {
+    if (isRecovery) { processRecurring(); render(); showAuth("reset"); return; } // mở từ email đặt lại mật khẩu
     try {
       const { data: { session } } = await SB.auth.getSession();
       if (session && session.user) { user = session.user; render(); await afterLogin(); return; }
     } catch (e) { console.warn(e); }
     // chưa đăng nhập -> chạy chế độ cục bộ (định kỳ sẽ sinh khi đăng nhập + đồng bộ)
-    processRecurring(); render(); showAuth();
+    processRecurring(); render(); showAuth("login");
   } else {
     processRecurring(); render();
   }

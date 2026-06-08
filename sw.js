@@ -1,5 +1,5 @@
 /* Service Worker — cache app shell để chạy offline (PWA) */
-const CACHE = "thuchi-v13";
+const CACHE = "thuchi-v14";
 const ASSETS = [
   "./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.jpg",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",
