@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+<meta name="theme-color" content="#0a0e1a" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -1000,25 +1001,35 @@ if (SB) {
 
 /* ==================== APPEARANCE (Liquid Glass background) ==================== */
 const BG_PRESETS = {
-  aurora:   { base: "#0a0e1a", img: "radial-gradient(at 18% 18%, rgba(124,58,237,.62), transparent 45%), radial-gradient(at 82% 8%, rgba(37,99,235,.55), transparent 42%), radial-gradient(at 62% 88%, rgba(219,39,119,.5), transparent 45%)" },
-  ocean:    { base: "#06121f", img: "radial-gradient(at 10% 12%, rgba(14,165,233,.6), transparent 48%), radial-gradient(at 95% 25%, rgba(37,99,235,.52), transparent 45%), radial-gradient(at 50% 100%, rgba(20,184,166,.5), transparent 50%)" },
-  sunset:   { base: "#160a1e", img: "radial-gradient(at 12% 12%, rgba(249,115,22,.55), transparent 46%), radial-gradient(at 88% 18%, rgba(219,39,119,.5), transparent 44%), radial-gradient(at 55% 92%, rgba(124,58,237,.5), transparent 48%)" },
-  forest:   { base: "#07140d", img: "radial-gradient(at 15% 15%, rgba(22,163,74,.55), transparent 48%), radial-gradient(at 85% 25%, rgba(13,148,136,.5), transparent 45%), radial-gradient(at 50% 95%, rgba(101,163,13,.5), transparent 50%)" },
-  graphite: { base: "#0a0e1a", img: "radial-gradient(at 25% 12%, rgba(71,85,105,.55), transparent 55%), radial-gradient(at 82% 8%, rgba(51,65,85,.5), transparent 50%)" },
+  aurora:   { base: "#0a0e1a", bar: "#1e2454", img: "radial-gradient(at 18% 18%, rgba(124,58,237,.62), transparent 45%), radial-gradient(at 82% 8%, rgba(37,99,235,.55), transparent 42%), radial-gradient(at 62% 88%, rgba(219,39,119,.5), transparent 45%)" },
+  ocean:    { base: "#06121f", bar: "#0a2a44", img: "radial-gradient(at 10% 12%, rgba(14,165,233,.6), transparent 48%), radial-gradient(at 95% 25%, rgba(37,99,235,.52), transparent 45%), radial-gradient(at 50% 100%, rgba(20,184,166,.5), transparent 50%)" },
+  sunset:   { base: "#160a1e", bar: "#2e1526", img: "radial-gradient(at 12% 12%, rgba(249,115,22,.55), transparent 46%), radial-gradient(at 88% 18%, rgba(219,39,119,.5), transparent 44%), radial-gradient(at 55% 92%, rgba(124,58,237,.5), transparent 48%)" },
+  forest:   { base: "#07140d", bar: "#0c2a1c", img: "radial-gradient(at 15% 15%, rgba(22,163,74,.55), transparent 48%), radial-gradient(at 85% 25%, rgba(13,148,136,.5), transparent 45%), radial-gradient(at 50% 95%, rgba(101,163,13,.5), transparent 50%)" },
+  graphite: { base: "#0a0e1a", bar: "#1a2335", img: "radial-gradient(at 25% 12%, rgba(71,85,105,.55), transparent 55%), radial-gradient(at 82% 8%, rgba(51,65,85,.5), transparent 50%)" },
 };
 const BG_LABELS = { aurora: "Aurora", ocean: "Đại dương", sunset: "Hoàng hôn", forest: "Rừng xanh", graphite: "Graphite" };
 
+function setBar(color) {
+  let m = document.querySelector('meta[name="theme-color"]');
+  if (!m) { m = document.createElement("meta"); m.setAttribute("name", "theme-color"); document.head.appendChild(m); }
+  m.setAttribute("content", color);
+  document.body.style.backgroundColor = color; // khớp vùng thanh trạng thái + đáy
+}
 function applyBg() {
   const el = $("appBg"); if (!el) return;
   const a = appearance || { type: "preset", key: "aurora" };
+  let bar;
   if (a.type === "image" && a.data) {
     el.style.backgroundColor = "#000";
     el.style.backgroundImage = `url("${a.data}")`;
+    bar = a.bar || "#0a0e1a";
   } else {
     const p = BG_PRESETS[a.key] || BG_PRESETS.aurora;
     el.style.backgroundColor = p.base;
     el.style.backgroundImage = p.img;
+    bar = p.bar || p.base;
   }
+  setBar(bar);
 }
 function saveAppearance() { ls.set(K.ap, appearance); cloudDirty(); }
 function setPreset(key) { appearance = { type: "preset", key }; saveAppearance(); applyBg(); renderAppearance(); }
@@ -1050,16 +1061,23 @@ function compressImage(file, cb) {
     const max = 1280; let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
     const scale = Math.min(1, max / Math.max(w, h)); w = Math.round(w * scale); h = Math.round(h * scale);
     const c = document.createElement("canvas"); c.width = w; c.height = h;
-    c.getContext("2d").drawImage(img, 0, 0, w, h);
+    const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
     URL.revokeObjectURL(url);
-    try { cb(c.toDataURL("image/jpeg", 0.72)); } catch (e) { alert("Không xử lý được ảnh này."); }
+    let bar = "#0a0e1a";
+    try {
+      const d = ctx.getImageData(0, 0, w, Math.max(1, Math.floor(h * 0.18))).data;
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < d.length; i += 60) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+      if (n) { r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n); bar = "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0")).join(""); }
+    } catch (e) {}
+    try { cb(c.toDataURL("image/jpeg", 0.72), bar); } catch (e) { alert("Không xử lý được ảnh này."); }
   };
   img.onerror = () => { URL.revokeObjectURL(url); alert("Không đọc được ảnh."); };
   img.src = url;
 }
 $("bgFile").addEventListener("change", (e) => {
   const file = e.target.files[0]; if (!file) return;
-  compressImage(file, (dataURL) => { appearance = { type: "image", data: dataURL }; saveAppearance(); applyBg(); renderAppearance(); });
+  compressImage(file, (dataURL, bar) => { appearance = { type: "image", data: dataURL, bar: bar }; saveAppearance(); applyBg(); renderAppearance(); });
   e.target.value = "";
 });
 
