@@ -7,5 +7,5 @@
 
    Nếu để nguyên "YOUR_..." app sẽ chạy ở chế độ OFFLINE (lưu trên máy).
    ============================================================ */
-window.SUPA_URL = "YOUR_SUPABASE_URL";
-window.SUPA_KEY = "YOUR_SUPABASE_ANON_KEY";
+window.SUPA_URL = "https://gtmnvgwvaouomrhxmcze.supabase.co";
+window.SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0bW52Z3d2YW91b21yaHhtY3plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4OTg1NDIsImV4cCI6MjA5NjQ3NDU0Mn0.hAHyBreRH0rgQsnAacYat0-lp6FKBVVCZ-xxINkOcrg";

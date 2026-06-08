@@ -44,7 +44,7 @@
 ```bash
 # (đã được khởi tạo sẵn git + commit đầu tiên)
 # Tạo 1 repo TRỐNG trên https://github.com/new  (đừng thêm README)
-git remote add origin https://github.com/<tài-khoản>/thu-chi-app.git
+git remote add origin https://github.com/nguyencongtuyenlp/thu-chi.git
 git branch -M main
 git push -u origin main
 ```
