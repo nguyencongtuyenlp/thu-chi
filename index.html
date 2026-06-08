@@ -27,7 +27,7 @@
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.30);
     --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
     --nav-bg: rgba(14,18,30,.62); color-scheme: dark;
-    --glass: rgba(22,28,46,.55); --glass-2: rgba(255,255,255,.05); --glass-border: rgba(255,255,255,.10); --glass-hi: rgba(255,255,255,.13); --glass-shadow: 0 10px 34px rgba(0,0,0,.32); --blur: 28px; --scrim: rgba(8,11,20,.34);
+    --glass: rgba(22,28,46,.48); --glass-2: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.10); --glass-hi: rgba(255,255,255,.13); --glass-shadow: 0 10px 34px rgba(0,0,0,.32); --blur: 28px; --scrim: rgba(8,11,20,.34); --glow: rgba(255,255,255,.22);
   }
   [data-theme="light"] {
     --bg: #f6f9fc; --bg-soft: #eef3f9; --card: #ffffff; --card-2: #f4f7fb;
@@ -39,7 +39,7 @@
     --shadow: 0 1px 2px rgba(0,55,112,.08), 0 10px 28px rgba(0,55,112,.07);
     --shadow-sm: 0 1px 2px rgba(0,55,112,.07);
     --nav-bg: rgba(255,255,255,.62); color-scheme: light;
-    --glass: rgba(255,255,255,.60); --glass-2: rgba(255,255,255,.45); --glass-border: rgba(255,255,255,.70); --glass-hi: rgba(255,255,255,.85); --glass-shadow: 0 10px 34px rgba(31,38,135,.13); --blur: 28px; --scrim: rgba(244,247,252,.40);
+    --glass: rgba(255,255,255,.60); --glass-2: rgba(255,255,255,.45); --glass-border: rgba(255,255,255,.70); --glass-hi: rgba(255,255,255,.85); --glass-shadow: 0 10px 34px rgba(31,38,135,.13); --blur: 28px; --scrim: rgba(244,247,252,.40); --glow: rgba(110,99,255,.16);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
@@ -233,15 +233,24 @@
   #appBg::after { content: ""; position: absolute; inset: 0; background: var(--scrim); }
   .panel, .card.income, .card.expense, .tabs, .auth-card, .account, .badge, .icon-btn, .btn:not(.primary) {
     background: var(--glass);
-    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%); backdrop-filter: blur(var(--blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06); backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hi);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px rgba(255,255,255,.05);
   }
   .field input, .field select, .filters input, .filters select, .bud-input, .seg, .tx, .list-row { background: var(--glass-2); border: 1px solid var(--glass-border); }
-  .card, .panel, .tx, .list-row, .btn, .btn-add, .icon-btn, .tabs button, .seg button, .preset {
-    transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .25s, background .2s, border-color .2s, color .15s;
+  /* vệt sáng chạy theo ngón tay (specular) */
+  .card, .btn, .btn-add, .icon-btn, .seg button, .tabs button, .preset, .tx, .list-row { position: relative; overflow: hidden; }
+  .card::after, .btn::after, .btn-add::after, .icon-btn::after, .seg button::after, .tabs button::after, .preset::after, .tx::after, .list-row::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(circle 100px at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 62%);
+    opacity: 0; transition: opacity .35s ease;
   }
-  .btn:active, .btn-add:active, .icon-btn:active, .tabs button:active, .seg button:active, .preset:active, .card.balance:active { transform: scale(.96); }
+  .is-touch::after { opacity: 1 !important; }
+  /* chuyển động lò xo + nhấn co lại */
+  .card, .panel, .tx, .list-row, .btn, .btn-add, .icon-btn, .tabs button, .seg button, .preset {
+    transition: transform .28s cubic-bezier(.34,1.45,.5,1), box-shadow .25s, background .2s, border-color .2s, color .15s;
+  }
+  .btn:active, .btn-add:active, .icon-btn:active, .tabs button:active, .seg button:active, .preset:active, .card:active, .tx:active, .list-row:active { transform: scale(.95); }
   .card.income:hover, .card.expense:hover, .tx:hover, .list-row:hover { transform: translateY(-2px); }
   /* swatches (ảnh nền) */
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 12px; }
@@ -1064,6 +1073,24 @@ function render() {
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
+
+/* ==================== INTERACTIVE GLASS (vệt sáng theo ngón tay) ==================== */
+const GLOW_SEL = ".card,.btn,.btn-add,.icon-btn,.seg button,.tabs button,.preset,.tx,.list-row";
+let glowEl = null;
+function glowMove(e) {
+  const el = e.target.closest(GLOW_SEL);
+  if (el !== glowEl) { if (glowEl) glowEl.classList.remove("is-touch"); glowEl = el; }
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+  el.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  el.classList.add("is-touch");
+}
+function glowEnd() { if (glowEl) { glowEl.classList.remove("is-touch"); glowEl = null; } }
+document.addEventListener("pointermove", glowMove, { passive: true });
+document.addEventListener("pointerdown", glowMove, { passive: true });
+document.addEventListener("pointerup", glowEnd, { passive: true });
+document.addEventListener("pointercancel", glowEnd, { passive: true });
 
 /* ==================== INIT ==================== */
 (async function init() {
