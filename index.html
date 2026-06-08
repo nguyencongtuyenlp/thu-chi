@@ -747,7 +747,7 @@ function showAuth() { $("authOverlay").hidden = false; }
 function hideAuth() { $("authOverlay").hidden = true; }
 function showAccount(email) { $("account").hidden = false; $("accEmail").textContent = email || ""; setSync("ok"); }
 function hideAccount() { $("account").hidden = true; }
-function authErr(msg) { $("authErr").textContent = msg || ""; }
+function authErr(msg, ok) { const e = $("authErr"); e.textContent = msg || ""; e.style.color = ok ? "var(--income)" : "var(--expense)"; }
 async function afterLogin() { hideAuth(); showAccount(user.email); await cloudPull(); renderCloudStatus(); }
 
 if (SB) {
@@ -761,12 +761,14 @@ if (SB) {
   });
   $("btnSignup").addEventListener("click", async () => {
     authErr(""); const email = $("authEmail").value.trim(), password = $("authPass").value;
-    if (!email || password.length < 6) { authErr("Mật khẩu cần tối thiểu 6 ký tự."); return; }
+    if (!email) { authErr("Vui lòng nhập email."); $("authEmail").focus(); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { authErr("Email chưa đúng định dạng."); $("authEmail").focus(); return; }
+    if (password.length < 6) { authErr("Mật khẩu cần tối thiểu 6 ký tự."); $("authPass").focus(); return; }
     const btn = $("btnSignup"); btn.disabled = true; btn.textContent = "Đang tạo...";
     const { data, error } = await SB.auth.signUp({ email, password });
     btn.disabled = false; btn.textContent = "Tạo tài khoản mới";
     if (error) { authErr(error.message); return; }
-    if (!data.session) authErr("Đã tạo tài khoản! Kiểm tra email để xác nhận, sau đó đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để đăng nhập ngay).");
+    if (!data.session) authErr("✅ Đã tạo tài khoản! Hãy kiểm tra email để xác nhận rồi bấm Đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để vào ngay không cần xác nhận).", true);
   });
   $("btnOffline").addEventListener("click", () => { offlineChosen = true; hideAuth(); });
   ["authEmail", "authPass"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); }));
