@@ -774,7 +774,8 @@ if (SB) {
     const { data, error } = await SB.auth.signUp({ email, password, options: redirectTo ? { emailRedirectTo: redirectTo } : undefined });
     btn.disabled = false; btn.textContent = "Tạo tài khoản mới";
     if (error) { authErr(error.message); return; }
-    if (!data.session) authErr("✅ Đã tạo tài khoản! Hãy kiểm tra email để xác nhận rồi bấm Đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để vào ngay không cần xác nhận).", true);
+    if (data.session) { user = data.session.user; await afterLogin(); }
+    else authErr("✅ Đã tạo tài khoản! Hãy kiểm tra email để xác nhận rồi bấm Đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để vào ngay không cần xác nhận).", true);
   });
   $("btnOffline").addEventListener("click", () => { offlineChosen = true; hideAuth(); });
   ["authEmail", "authPass"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); }));
