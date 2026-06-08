@@ -765,7 +765,8 @@ if (SB) {
     if (!/^\S+@\S+\.\S+$/.test(email)) { authErr("Email chưa đúng định dạng."); $("authEmail").focus(); return; }
     if (password.length < 6) { authErr("Mật khẩu cần tối thiểu 6 ký tự."); $("authPass").focus(); return; }
     const btn = $("btnSignup"); btn.disabled = true; btn.textContent = "Đang tạo...";
-    const { data, error } = await SB.auth.signUp({ email, password });
+    const redirectTo = location.origin.includes("localhost") ? undefined : location.origin;
+    const { data, error } = await SB.auth.signUp({ email, password, options: redirectTo ? { emailRedirectTo: redirectTo } : undefined });
     btn.disabled = false; btn.textContent = "Tạo tài khoản mới";
     if (error) { authErr(error.message); return; }
     if (!data.session) authErr("✅ Đã tạo tài khoản! Hãy kiểm tra email để xác nhận rồi bấm Đăng nhập. (Mẹo: tắt 'Confirm email' trong Supabase để vào ngay không cần xác nhận).", true);
