@@ -1,0 +1,15 @@
+{
+  "name": "Quản Lý Thu Chi Cá Nhân",
+  "short_name": "Thu Chi",
+  "description": "Theo dõi thu chi cá nhân, ngân sách, đồng bộ đám mây.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "vi",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

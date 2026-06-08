@@ -1,0 +1,15 @@
+# Vercel
+.vercel
+
+# Node (nếu sau này dùng)
+node_modules
+npm-debug.log*
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+*.log
+
+# LƯU Ý: KHÔNG ignore config.js.
+# anon key của Supabase được thiết kế để công khai (đã có RLS bảo vệ),
+# nên cần commit config.js để Vercel có cấu hình khi build/deploy.
