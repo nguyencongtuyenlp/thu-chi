@@ -755,9 +755,14 @@ if (SB) {
     authErr(""); const email = $("authEmail").value.trim(), password = $("authPass").value;
     if (!email || !password) { authErr("Nhập email và mật khẩu."); return; }
     const btn = $("btnLogin"); btn.disabled = true; btn.textContent = "Đang đăng nhập...";
-    const { error } = await SB.auth.signInWithPassword({ email, password });
+    const { data, error } = await SB.auth.signInWithPassword({ email, password });
     btn.disabled = false; btn.textContent = "Đăng nhập";
-    if (error) authErr(error.message.includes("Invalid") ? "Sai email hoặc mật khẩu." : error.message);
+    if (error) {
+      authErr(error.message.includes("Invalid") || error.message.includes("credentials") ? "Sai email hoặc mật khẩu." : error.message);
+    } else if (data && data.session) {
+      user = data.session.user;
+      await afterLogin();
+    }
   });
   $("btnSignup").addEventListener("click", async () => {
     authErr(""); const email = $("authEmail").value.trim(), password = $("authPass").value;
