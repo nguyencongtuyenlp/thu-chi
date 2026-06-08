@@ -803,12 +803,24 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   fillTxCats(); fillRecCats();
   processRecurring();
   render();
+
+  // Xử lý hash từ Supabase (error hoặc access_token sau email confirm)
+  const hash = location.hash;
+  if (hash.includes("error=")) {
+    // Xoá hash khỏi URL để tránh lỗi lần sau
+    history.replaceState(null, "", location.pathname);
+    const desc = new URLSearchParams(hash.slice(1)).get("error_description") || "";
+    if (desc.toLowerCase().includes("expired")) {
+      // Link xác nhận hết hạn — tài khoản có thể đã tồn tại, chỉ cần đăng nhập
+    }
+  }
+
   if (SB) {
     try {
       const { data: { session } } = await SB.auth.getSession();
       if (session && session.user) { user = session.user; await afterLogin(); }
       else { showAuth(); }
-    } catch (e) { console.warn(e); }
+    } catch (e) { console.warn(e); showAuth(); }
   }
 })();
 </script>
