@@ -232,6 +232,8 @@
   /* ===== LIQUID GLASS (iOS 26) ===== */
   #appBg { position: fixed; inset: 0; z-index: -2; background: var(--bg); background-size: cover; background-position: center; transition: background-image .45s ease, background-color .45s ease; }
   #appBg::after { content: ""; position: absolute; inset: 0; background: var(--scrim); }
+  /* lớp đỉnh: nối liền màu thanh trạng thái -> hình nền (hết đường ranh) */
+  #appTop { position: fixed; top: 0; left: 0; right: 0; height: 220px; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, var(--bar, #0a0e1a) 0%, var(--bar, #0a0e1a) 10%, transparent 100%); transition: background .45s ease; }
   .panel, .card.income, .card.expense, .tabs, .auth-card, .account, .badge, .icon-btn, .btn:not(.primary) {
     background: var(--glass);
     -webkit-backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06); backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06);
@@ -301,6 +303,7 @@
 </head>
 <body>
 <div id="appBg"></div>
+<div id="appTop"></div>
 <div class="wrap">
   <header class="app-head">
     <div class="brand">
@@ -1013,6 +1016,7 @@ function setBar(color) {
   let m = document.querySelector('meta[name="theme-color"]');
   if (!m) { m = document.createElement("meta"); m.setAttribute("name", "theme-color"); document.head.appendChild(m); }
   m.setAttribute("content", color);
+  document.documentElement.style.setProperty("--bar", color);
   document.body.style.backgroundColor = color; // khớp vùng thanh trạng thái + đáy
 }
 function applyBg() {
