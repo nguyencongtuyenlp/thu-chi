@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-title" content="Thu Chi" />
 <meta name="description" content="Ứng dụng quản lý thu chi cá nhân, đồng bộ đám mây." />
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="apple-touch-icon" href="icon.svg" />
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.jpg" />
+<link rel="icon" href="icon.jpg" type="image/jpeg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -64,6 +64,7 @@
   .brand { display: flex; align-items: center; gap: 12px; }
   .brand .logo { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-d)); color: #fff; display: grid; place-items: center; box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 40%, transparent); }
   .brand .logo svg { width: 23px; height: 23px; }
+  .brand .logo img, .auth-card .logo.big img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
   .brand h1 { font-size: 18px; font-weight: 600; letter-spacing: -.3px; }
   .brand p { font-size: 12.5px; color: var(--muted); }
   .head-right { display: flex; align-items: center; gap: 8px; }
@@ -307,7 +308,7 @@
 <div class="wrap">
   <header class="app-head">
     <div class="brand">
-      <div class="logo" data-icon="wallet"></div>
+      <div class="logo"><img src="icon.jpg" alt="Logo" /></div>
       <div>
         <h1>Quản Lý Thu Chi</h1>
         <p>Theo dõi tài chính cá nhân</p>
@@ -444,7 +445,7 @@
 <!-- ===== AUTH OVERLAY ===== -->
 <div class="auth-overlay" id="authOverlay" hidden>
   <div class="auth-card">
-    <div class="logo big" data-icon="wallet"></div>
+    <div class="logo big"><img src="icon.jpg" alt="Logo" /></div>
     <h2>Quản Lý Thu Chi</h2>
     <p class="muted">Đăng nhập để đồng bộ dữ liệu trên mọi thiết bị</p>
     <div class="field"><label>Email</label><input type="email" id="authEmail" placeholder="ban@email.com" autocomplete="username" /></div>

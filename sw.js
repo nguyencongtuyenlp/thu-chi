@@ -1,8 +1,8 @@
 /* Service Worker — cache app shell để chạy offline (PWA) */
-const CACHE = "thuchi-v12";
+const CACHE = "thuchi-v13";
 const ASSETS = [
-  "./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg",
-  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+  "./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.jpg",
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",
 ];
 
 self.addEventListener("install", (e) => {
