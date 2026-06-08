@@ -544,10 +544,10 @@ const CAT_COLORS = ["#6d63ff","#ec4899","#f59e0b","#10b981","#3b82f6","#ef4444",
 const PICK_ICONS = [["tag","Nhãn"],["home","Nhà"],["car","Xe"],["utensils","Ăn uống"],["bag","Mua sắm"],["coffee","Cà phê"],["heart","Sức khỏe"],["book","Học tập"],["gamepad","Giải trí"],["gift","Quà"],["briefcase","Công việc"],["banknote","Tiền"],["dollar","Tiền tệ"],["award","Thưởng"],["receipt","Hóa đơn"],["package","Khác"]];
 
 /* ==================== STORAGE ==================== */
-const K = { tx: "thuchi_data_v1", bud: "thuchi_budgets_v1", rec: "thuchi_recurring_v1", cc: "thuchi_customcats_v1", th: "thuchi_theme_v1", ap: "thuchi_appearance_v1" };
+const K = { tx: "thuchi_data_v1", bud: "thuchi_budgets_v1", rec: "thuchi_recurring_v1", cc: "thuchi_customcats_v1", th: "thuchi_theme_v1", ap: "thuchi_appearance_v1", dirty: "thuchi_dirty_v1" };
 const ls = {
   get(k, def) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch { return def; } },
-  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn("Lưu cục bộ thất bại:", e); if (String(e).toLowerCase().includes("quota") || (e && e.name === "QuotaExceededError")) alert("⚠️ Bộ nhớ trình duyệt đã đầy nên không lưu được. Hãy chọn ảnh nền nhẹ hơn, hoặc xuất sao lưu rồi xóa bớt dữ liệu cũ."); } },
 };
 let txs = ls.get(K.tx, []);
 let budgets = ls.get(K.bud, { total: 0, cats: {} });
@@ -559,7 +559,7 @@ let appearance = ls.get(K.ap, { type: "preset", key: "aurora" });
 /* ==================== SUPABASE ==================== */
 const CLOUD_ON = !!(window.SUPA_URL && window.SUPA_KEY && !/YOUR_/.test(window.SUPA_URL) && !/YOUR_/.test(window.SUPA_KEY) && window.supabase);
 const SB = CLOUD_ON ? window.supabase.createClient(window.SUPA_URL, window.SUPA_KEY) : null;
-let user = null, offlineChosen = false, pushTimer = null;
+let user = null, offlineChosen = false, pushTimer = null, pulling = false, dirty = false, currentUid = null;
 
 function saveTx() { ls.set(K.tx, txs); cloudDirty(); }
 function saveBud() { ls.set(K.bud, budgets); cloudDirty(); }
@@ -569,24 +569,37 @@ function persistLocal() { ls.set(K.tx, txs); ls.set(K.bud, budgets); ls.set(K.re
 
 function collectState() { return { v: 2, txs, budgets, recurring, customCats, appearance }; }
 function setSync(s) { const d = $("syncDot"); if (d) d.className = "sync " + s; }
-function cloudDirty() { if (user && SB) { setSync("saving"); clearTimeout(pushTimer); pushTimer = setTimeout(cloudPush, 800); } }
+function cloudDirty() {
+  if (!(user && SB)) return;
+  dirty = true; ls.set(K.dirty, 1);
+  if (pulling) return; // đang kéo dữ liệu về thì chưa lên lịch đẩy
+  setSync("saving"); clearTimeout(pushTimer); pushTimer = setTimeout(cloudPush, 800);
+}
 async function cloudPush() {
   if (!user || !SB) return;
   try {
     const { error } = await SB.from("user_data").upsert({ user_id: user.id, data: collectState(), updated_at: new Date().toISOString() });
-    setSync(error ? "error" : "ok");
-    if (error) console.warn("Lỗi đồng bộ:", error.message);
+    if (error) { setSync("error"); console.warn("Lỗi đồng bộ:", error.message); }
+    else { dirty = false; ls.set(K.dirty, 0); setSync("ok"); }
   } catch (e) { setSync("error"); console.warn(e); }
 }
 async function cloudPull() {
   if (!user || !SB) return;
-  setSync("saving");
+  pulling = true; setSync("saving");
   try {
+    const hasLocalEdits = dirty || !!ls.get(K.dirty, 0); // thay đổi cục bộ chưa kịp đẩy
     const { data, error } = await SB.from("user_data").select("data").eq("user_id", user.id).maybeSingle();
     if (error) { setSync("error"); console.warn(error.message); return; }
-    if (data && data.data && Array.isArray(data.data.txs)) { applyState(data.data); setSync("ok"); }
-    else { await cloudPush(); }
+    if (hasLocalEdits) { processRecurring(); render(); await cloudPush(); }          // GIỮ thay đổi cục bộ, không ghi đè
+    else if (data && data.data && Array.isArray(data.data.txs)) { applyState(data.data); } // áp dữ liệu cloud
+    else if (!data) { processRecurring(); render(); await cloudPush(); }              // chưa có row -> seed từ máy
+    else { console.warn("Bỏ qua: dữ liệu cloud không hợp lệ."); }
+    setSync("ok");
   } catch (e) { setSync("error"); console.warn(e); }
+  finally {
+    pulling = false;
+    if (dirty) { clearTimeout(pushTimer); pushTimer = setTimeout(cloudPush, 800); } // đẩy giao dịch định kỳ vừa sinh
+  }
 }
 function applyState(s) {
   txs = s.txs || []; budgets = s.budgets || { total: 0, cats: {} };
@@ -611,7 +624,7 @@ function daysInMonth(y, m0) { return new Date(y, m0 + 1, 0).getDate(); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function attachNumFormat(el) { el.addEventListener("input", () => { const v = onlyNum(el.value); el.value = v ? new Intl.NumberFormat("vi-VN").format(v) : ""; }); }
 function monthLabel(ym) { const [y, m] = ym.split("-"); return "Th" + (+m) + "/" + y.slice(2); }
-function uid() { return Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36); }
+function uid() { try { return crypto.randomUUID(); } catch (e) { return Date.now().toString(36) + "_" + Math.floor(Math.random() * 1e9).toString(36); } }
 function flash(btn, msg) { const old = btn.textContent; btn.textContent = msg; btn.disabled = true; setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1300); }
 
 /* ==================== THEME ==================== */
@@ -758,12 +771,12 @@ function renderTips() {
   for (const [cid, lim] of Object.entries(budgets.cats || {})) {
     if (!lim) continue;
     const spent = sumWhere(t => t.type === "expense" && t.category === cid && t.date.startsWith(cm));
-    if (spent > lim) { const ci = catInfo("expense", cid); overCats.push(`${ci.name} (+${fmt(spent - lim)})`); }
+    if (spent > lim) { const ci = catInfo("expense", cid); overCats.push(`${escapeHtml(ci.name)} (+${fmt(spent - lim)})`); }
   }
   if (overCats.length) tips.push({ tone: "bad", text: `Vượt ngân sách danh mục: <b>${overCats.slice(0, 3).join(", ")}</b>.` });
   const byCat = {}; txs.filter(t => t.type === "expense" && t.date.startsWith(cm)).forEach(t => byCat[t.category] = (byCat[t.category] || 0) + t.amount);
   const top = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
-  if (top && curExp > 0) { const ci = catInfo("expense", top[0]); tips.push({ tone: "info", text: `Chi nhiều nhất cho <b>${ci.name}</b>: ${fmt(top[1])} (${Math.round(top[1] / curExp * 100)}% chi tiêu).` }); }
+  if (top && curExp > 0) { const ci = catInfo("expense", top[0]); tips.push({ tone: "info", text: `Chi nhiều nhất cho <b>${escapeHtml(ci.name)}</b>: ${fmt(top[1])} (${Math.round(top[1] / curExp * 100)}% chi tiêu).` }); }
   if (prevExp > 0 && curExp > 0) {
     const diff = (curExp - prevExp) / prevExp * 100;
     if (diff > 15) tips.push({ tone: "warn", text: `Chi tiêu <b>tăng ${diff.toFixed(0)}%</b> so với tháng trước (${fmt(prevExp)} → ${fmt(curExp)}).` });
@@ -823,12 +836,17 @@ function processRecurring() {
     const startIdx = sy * 12 + (sm - 1);
     let fromIdx;
     if (rec.lastApplied) { const [ly, lm] = rec.lastApplied.split("-").map(Number); fromIdx = ly * 12 + (lm - 1) + 1; } else fromIdx = startIdx;
-    for (let idx = Math.max(startIdx, fromIdx); idx <= curIdx; idx++) {
+    for (let idx = Math.max(startIdx, fromIdx, curIdx - 11); idx <= curIdx; idx++) {
       const y = Math.floor(idx / 12), m0 = idx % 12;
       if (idx === curIdx && now.getDate() < rec.day) break;
+      const period = y + "-" + pad2(m0 + 1);
       const day = Math.min(rec.day, daysInMonth(y, m0));
-      txs.unshift({ id: uid(), type: rec.type, amount: rec.amount, category: rec.category, note: rec.note, date: y + "-" + pad2(m0 + 1) + "-" + pad2(day), recurringId: rec.id });
-      rec.lastApplied = y + "-" + pad2(m0 + 1); changed = true;
+      // chỉ tạo nếu chưa có giao dịch của recurring này trong tháng đó -> idempotent, không nhân đôi khi đồng bộ đa thiết bị
+      if (!txs.some(t => t.recurringId === rec.id && (t.date || "").startsWith(period))) {
+        txs.unshift({ id: "r_" + rec.id + "_" + period, type: rec.type, amount: rec.amount, category: rec.category, note: rec.note, date: period + "-" + pad2(day), recurringId: rec.id });
+        changed = true;
+      }
+      rec.lastApplied = period;
     }
   });
   if (changed) { saveTx(); saveRec(); }
@@ -935,18 +953,34 @@ $("btnExport").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "thu-chi-" + todayStr() + ".json"; a.click(); URL.revokeObjectURL(a.href);
 });
+function cleanTxs(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.filter(t => t && (t.type === "income" || t.type === "expense") && Number.isFinite(+t.amount) && /^\d{4}-\d{2}-\d{2}$/.test(t.date || ""))
+    .map(t => ({ id: t.id ? String(t.id) : uid(), type: t.type, amount: Math.abs(Math.round(+t.amount)), category: String(t.category || "other_e"), note: String(t.note || "").slice(0, 200), date: t.date, ...(t.recurringId ? { recurringId: String(t.recurringId) } : {}) }));
+}
+function cleanCats(cc) {
+  const out = { expense: [], income: [] };
+  ["expense", "income"].forEach(tp => { if (cc && Array.isArray(cc[tp])) cc[tp].forEach(c => { if (c && c.name) out[tp].push({ id: String(c.id || ("cc_" + uid())), name: String(c.name).slice(0, 40), icon: String(c.icon || "tag"), custom: true }); }); });
+  return out;
+}
 $("btnImport").addEventListener("click", () => $("fileImport").click());
 $("fileImport").addEventListener("change", (e) => {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const data = JSON.parse(reader.result); let n;
-      if (Array.isArray(data)) { if (!confirm(`Nhập ${data.length} giao dịch? Dữ liệu hiện tại sẽ bị thay thế.`)) return; txs = data; n = data.length; }
-      else if (data && Array.isArray(data.txs)) { if (!confirm(`Nhập ${data.txs.length} giao dịch + ngân sách + định kỳ? Dữ liệu hiện tại sẽ bị thay thế.`)) return; txs = data.txs; budgets = data.budgets || { total: 0, cats: {} }; recurring = data.recurring || []; customCats = data.customCats || { expense: [], income: [] }; n = txs.length; }
-      else throw new Error();
+      const data = JSON.parse(reader.result); let t;
+      if (Array.isArray(data)) { t = cleanTxs(data); if (!confirm(`Nhập ${t.length} giao dịch hợp lệ? Dữ liệu hiện tại sẽ bị thay thế.`)) return; txs = t; }
+      else if (data && Array.isArray(data.txs)) {
+        t = cleanTxs(data.txs);
+        if (!confirm(`Nhập ${t.length} giao dịch hợp lệ + ngân sách + định kỳ? Dữ liệu hiện tại sẽ bị thay thế.`)) return;
+        txs = t;
+        budgets = (data.budgets && typeof data.budgets === "object" && data.budgets.cats) ? { total: +data.budgets.total || 0, cats: data.budgets.cats } : { total: 0, cats: {} };
+        recurring = Array.isArray(data.recurring) ? data.recurring : [];
+        customCats = cleanCats(data.customCats);
+      } else throw new Error();
       persistLocal(); cloudDirty(); fillTxCats(); fillRecCats(); render();
-      alert(`Đã nhập ${n} giao dịch thành công!`);
+      alert(`Đã nhập ${t.length} giao dịch thành công!`);
     } catch { alert("File không hợp lệ!"); }
     e.target.value = "";
   };
@@ -964,7 +998,11 @@ function hideAuth() { $("authOverlay").hidden = true; }
 function showAccount(email) { $("account").hidden = false; $("accEmail").textContent = email || ""; setSync("ok"); }
 function hideAccount() { $("account").hidden = true; }
 function authErr(msg, ok) { const e = $("authErr"); e.textContent = msg || ""; e.style.color = ok ? "var(--income)" : "var(--expense)"; }
-async function afterLogin() { hideAuth(); showAccount(user.email); await cloudPull(); renderCloudStatus(); }
+async function afterLogin() {
+  if (currentUid === user.id) return; // tránh chạy 2 lần (handler + onAuthStateChange)
+  currentUid = user.id;
+  hideAuth(); showAccount(user.email); await cloudPull(); renderCloudStatus();
+}
 
 if (SB) {
   $("btnLogin").addEventListener("click", async () => {
@@ -998,7 +1036,14 @@ if (SB) {
   $("btnLogout").addEventListener("click", async () => { await SB.auth.signOut(); });
   SB.auth.onAuthStateChange((_ev, session) => {
     if (session && session.user) { user = session.user; afterLogin(); }
-    else { user = null; hideAccount(); renderCloudStatus(); if (!offlineChosen) showAuth(); }
+    else {
+      user = null; currentUid = null; dirty = false;
+      // xóa dữ liệu cục bộ khi đăng xuất để không lộ cho người dùng khác trên cùng máy
+      txs = []; budgets = { total: 0, cats: {} }; recurring = []; customCats = { expense: [], income: [] }; appearance = { type: "preset", key: "aurora" };
+      [K.tx, K.bud, K.rec, K.cc, K.ap, K.dirty].forEach(k => localStorage.removeItem(k));
+      fillTxCats(); fillRecCats(); applyBg(); hideAccount(); render();
+      if (!offlineChosen) showAuth();
+    }
   });
 }
 
@@ -1121,20 +1166,19 @@ document.addEventListener("pointercancel", glowEnd, { passive: true });
   applyBg();
   $("inDate").value = todayStr();
   fillTxCats(); fillRecCats();
-  processRecurring();
-  render();
 
   const hash = location.hash;
-  if (hash.includes("error=")) {
-    history.replaceState(null, "", location.pathname);
-  }
+  if (hash.includes("error=")) history.replaceState(null, "", location.pathname);
 
   if (SB) {
     try {
       const { data: { session } } = await SB.auth.getSession();
-      if (session && session.user) { user = session.user; await afterLogin(); }
-      else { showAuth(); }
-    } catch (e) { console.warn(e); showAuth(); }
+      if (session && session.user) { user = session.user; render(); await afterLogin(); return; }
+    } catch (e) { console.warn(e); }
+    // chưa đăng nhập -> chạy chế độ cục bộ (định kỳ sẽ sinh khi đăng nhập + đồng bộ)
+    processRecurring(); render(); showAuth();
+  } else {
+    processRecurring(); render();
   }
 })();
 </script>
