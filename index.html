@@ -29,6 +29,7 @@
     --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
     --nav-bg: rgba(14,18,30,.62); color-scheme: dark;
     --glass: rgba(22,28,46,.48); --glass-2: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.10); --glass-hi: rgba(255,255,255,.13); --glass-shadow: 0 10px 34px rgba(0,0,0,.32); --blur: 28px; --scrim: rgba(8,11,20,.34); --glow: rgba(255,255,255,.22);
+    --lg-edge: rgba(255,255,255,.82); --lg-edge-2: rgba(255,255,255,.30); --lg-core: rgba(255,255,255,.09); --lg-gloss: .72;
   }
   [data-theme="light"] {
     --bg: #f6f9fc; --bg-soft: #eef3f9; --card: #ffffff; --card-2: #f4f7fb;
@@ -41,6 +42,7 @@
     --shadow-sm: 0 1px 2px rgba(0,55,112,.07);
     --nav-bg: rgba(255,255,255,.62); color-scheme: light;
     --glass: rgba(255,255,255,.60); --glass-2: rgba(255,255,255,.45); --glass-border: rgba(255,255,255,.70); --glass-hi: rgba(255,255,255,.85); --glass-shadow: 0 10px 34px rgba(31,38,135,.13); --blur: 28px; --scrim: rgba(244,247,252,.40); --glow: rgba(110,99,255,.16);
+    --lg-edge: rgba(255,255,255,.95); --lg-edge-2: rgba(255,255,255,.62); --lg-core: rgba(255,255,255,.16); --lg-gloss: .46;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
@@ -242,7 +244,12 @@
     background: var(--glass);
     -webkit-backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06); backdrop-filter: blur(var(--blur)) saturate(180%) brightness(1.06);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-hi), inset 0 0 0 1px rgba(255,255,255,.05);
+    box-shadow:
+      var(--glass-shadow),
+      inset 1.2px 1.5px .5px -1px var(--lg-edge),
+      inset -1px -1.3px .5px -1px var(--lg-edge-2),
+      inset 0 0 12px 1px var(--lg-core),
+      inset 0 0 0 1px rgba(255,255,255,.04);
   }
   .field input, .field select, .filters input, .filters select, .bud-input, .seg, .tx, .list-row { background: var(--glass-2); border: 1px solid var(--glass-border); }
   /* vệt sáng chạy theo ngón tay (specular) */
@@ -267,6 +274,47 @@
   .preset .pchk svg { width: 14px; height: 14px; }
   .preset.upload { color: var(--muted); background: var(--glass-2); }
   .preset.upload svg { width: 20px; height: 20px; }
+
+  /* ===== LIQUID GLASS — đồng bộ các nút (iOS 26) ===== */
+  /* khúc xạ nền thật khi trình duyệt hỗ trợ (Chrome/Edge); iOS tự fallback về blur sẵn có */
+  @supports ((backdrop-filter: url(#lg)) or (-webkit-backdrop-filter: url(#lg))) {
+    .btn:not(.primary), .icon-btn {
+      -webkit-backdrop-filter: url(#lg) saturate(1.5) brightness(1.05);
+      backdrop-filter: url(#lg) saturate(1.5) brightness(1.05);
+    }
+  }
+  /* vệt gloss luôn hiện, xoay theo con trỏ — đặc trưng "kính bắt sáng" */
+  .btn::before, .btn-add::before, .icon-btn::before, .preset::before,
+  .seg button.active::before, .tabs button.active::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(var(--gloss-angle, 115deg),
+      rgba(255,255,255,.32) 0%, rgba(255,255,255,.06) 30%,
+      rgba(255,255,255,0) 54%, rgba(255,255,255,.05) 80%, rgba(255,255,255,.15) 100%);
+    opacity: var(--lg-gloss, .6); mix-blend-mode: screen;
+    transition: opacity .3s ease;
+  }
+  /* CTA tím cũng mang viền kính + lõi sáng để đồng bộ chất liệu */
+  .btn-add, .btn.primary {
+    box-shadow:
+      0 8px 20px color-mix(in srgb, var(--primary) 32%, transparent),
+      inset 1.2px 1.5px .5px -1px rgba(255,255,255,.9),
+      inset -1px -1.3px .5px -1px rgba(255,255,255,.38),
+      inset 0 0 14px 1px rgba(255,255,255,.14);
+  }
+  .btn-add:hover, .btn.primary:hover {
+    box-shadow:
+      0 10px 24px color-mix(in srgb, var(--primary) 38%, transparent),
+      inset 1.2px 1.5px .5px -1px rgba(255,255,255,.96),
+      inset -1px -1.3px .5px -1px rgba(255,255,255,.42),
+      inset 0 0 16px 1px rgba(255,255,255,.18);
+  }
+  /* nảy nhẹ khi rê chuột (chỉ thiết bị có hover) */
+  @media (hover: hover) {
+    .btn:hover, .btn-add:hover, .icon-btn:hover, .preset:hover { transform: scale(1.03); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn:hover, .btn-add:hover, .icon-btn:hover, .preset:hover { transform: none; }
+  }
 
   /* ===== MOBILE ===== */
   @media (max-width: 860px) {
@@ -308,6 +356,15 @@
 <body>
 <div id="appBg"></div>
 <div id="appTop"></div>
+<!-- Bộ lọc khúc xạ Liquid Glass: bẻ cong hình nền sau nút (chỉ trình duyệt hỗ trợ url() trong backdrop-filter) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="lg" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.013 0.021" numOctaves="2" seed="6" result="n"/>
+    <feGaussianBlur in="n" stdDeviation="2" result="s"/>
+    <feDisplacementMap in="SourceGraphic" in2="s" scale="26" xChannelSelector="R" yChannelSelector="G" result="d"/>
+    <feGaussianBlur in="d" stdDeviation="2.5"/>
+  </filter>
+</svg>
 <div class="wrap">
   <header class="app-head">
     <div class="brand">
@@ -1211,6 +1268,8 @@ function glowMove(e) {
   const r = el.getBoundingClientRect();
   el.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
   el.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  const ang = Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI;
+  el.style.setProperty("--gloss-angle", (ang + 240).toFixed(1) + "deg");
   el.classList.add("is-touch");
 }
 function glowEnd() { if (glowEl) { glowEl.classList.remove("is-touch"); glowEl = null; } }
